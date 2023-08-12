@@ -1,15 +1,20 @@
-const express = require('express');
+// Add Express
+const express = require("express");
+// Initialize Express
 const app = express();
-const apiRoutes = require('./routes/api');
+const wordController = require('./src/controllers/CharacterController');
 
-// Configuration d'Express et d'autres middleware
-
-// Montage des routes de l'API sous "/api"
-app.use('/api', apiRoutes);
-
-// D'autres configurations et middleware
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// Create GET request
+app.get("/", (req, res) => {
+  res.send("Express on Vercel");
 });
+
+app.get('/random-word', wordController.getRandomWord);
+
+// Initialize server
+app.listen(5000, () => {
+  console.log("Running on port 5000.");
+});
+// Export the Express API
+module.exports = app;
+
