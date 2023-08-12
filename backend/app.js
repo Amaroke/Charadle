@@ -1,20 +1,29 @@
-// Add Express
-const express = require("express");
-// Initialize Express
+// app.js
+const express = require('express');
 const app = express();
 const wordController = require('./src/controllers/CharacterController');
+const animeController = require('./src/controllers/AnimeController'); // Import the Anime controller
 
-// Create GET request
-app.get("/", (req, res) => {
-  res.send("Express on Vercel");
+
+app.get('/', (req, res) => {
+  res.send('Express on Vercel');
 });
 
 app.get('/random-word', wordController.getRandomWord);
 
-// Initialize server
-app.listen(5000, () => {
-  console.log("Running on port 5000.");
+app.get('/random-anime', async (req, res) => {
+  try {
+    console.log('Fetching random anime...');
+    const randomAnime = await animeController.getRandomAnime();
+    res.json(randomAnime);
+  } catch (error) {
+    console.error('Error while fetching random anime:', error);
+    res.status(500).json({ error: 'Error retrieving random anime' });
+  }
 });
-// Export the Express API
-module.exports = app;
 
+app.listen(5000, () => {
+  console.log('Running on port 5000.');
+});
+
+module.exports = app;
