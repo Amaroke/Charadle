@@ -25,6 +25,11 @@ app.get('/user/:username', async (req, res) => {
   }
 });
 
+app.get('*', (req, res) => {
+  res.status(404).json({ error: 'Resource not found' });
+});
+
+
 app.listen(5000, () => {
   console.log('Running on port 5000.');
 });
