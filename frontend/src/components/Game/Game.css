@@ -1,0 +1,22 @@
+/* Styles pour le clavier et les boutons */
+.keyboard {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .keyboard-button {
+    padding: 10px;
+    font-size: 16px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .keyboard-button.disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+  }
+  
