@@ -1,14 +1,13 @@
 {
   "files": {
-    "main.css": "/Charadle/static/css/main.073c9b0a.css",
-    "main.js": "/Charadle/static/js/main.de0c331a.js",
-    "static/media/logo.svg": "/Charadle/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "main.css": "/Charadle/static/css/main.e6a32fb4.css",
+    "main.js": "/Charadle/static/js/main.99a3e1dc.js",
     "index.html": "/Charadle/index.html",
-    "main.073c9b0a.css.map": "/Charadle/static/css/main.073c9b0a.css.map",
-    "main.de0c331a.js.map": "/Charadle/static/js/main.de0c331a.js.map"
+    "main.e6a32fb4.css.map": "/Charadle/static/css/main.e6a32fb4.css.map",
+    "main.99a3e1dc.js.map": "/Charadle/static/js/main.99a3e1dc.js.map"
   },
   "entrypoints": [
-    "static/css/main.073c9b0a.css",
-    "static/js/main.de0c331a.js"
+    "static/css/main.e6a32fb4.css",
+    "static/js/main.99a3e1dc.js"
   ]
 }
