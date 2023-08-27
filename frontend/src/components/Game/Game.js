@@ -1,26 +1,48 @@
-import React, {  useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "./Game.css"
 
 const Game = () => {
+    const [characterImage, setCharacterImage] = useState(null);
+    useEffect(() => {
 
-    function fetchRandomTopAnime() {
-        const apiURL = "https://charadle.vercel.app/randomTopAnime";
+        function fetchRandomTopAnime() {
 
-        fetch(apiURL, {mode: 'cors'})
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Erreur de requête : ${response.status}`);
-                }   
-                return response.json();
-            })
-            .then(data => {
-                const animeNumber = data.number; // Récupère le numéro de l'anime depuis la réponse JSON
-                console.log("Numéro de l'anime : " + animeNumber); // Affiche le numéro de l'anime dans la console
-            })
-            .catch(error => {
-                console.error(`Erreur : ${error.message}`);
-            });
-    }
+            const apiURL = "https://charadle.vercel.app/randomUserAnime/Amaroke";
+
+            fetch(apiURL)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erreur de requête : ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const animeID = data.split(' ')[0];
+                    console.log("ID de l'anime : " + animeID);
+
+                    const nouvelleURL = `https://charadle.vercel.app/randomCharacterImage/${animeID}`;
+                    return fetch(nouvelleURL);
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erreur de requête : ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Données de l'anime : ", data);
+                    setCharacterImage(data);
+                })
+                .catch(error => {
+                    console.error(`Erreur : ${error.message}`);
+                });
+        }
+
+        fetchRandomTopAnime();
+
+
+    }, []);
+
 
     const [guess, setGuess] = useState('');
     const [targetWord] = useState('APPLE');
@@ -54,13 +76,11 @@ const Game = () => {
 
     const keyboardLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
-    console.log(fetchRandomTopAnime());
-
     return (
         <div>
             <h1>Jeu Wordle</h1>
             <p>Devinez le mot de 5 lettres:</p>
-            <img href={""} alt="character" />
+            <img src={characterImage} alt="character" />
             <form onSubmit={handleGuessSubmit}>
                 <input
                     type="text"
