@@ -1,22 +1,81 @@
-/* Styles pour le clavier et les boutons */
-.keyboard {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-    margin-top: 20px;
-  }
-  
-  .keyboard-button {
-    padding: 10px;
-    font-size: 16px;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .keyboard-button.disabled {
-    background-color: #ddd;
-    cursor: not-allowed;
-  }
-  
+.characterImage {
+  position: relative;
+  background-position: center;
+  width: 200px;
+  width: 15%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  margin-bottom: 50px;
+  margin-top: 20px
+}
+
+/* Letters container */
+.letters-container {
+  display: flex;
+  flex-direction: column; /* Change la direction en colonne */
+  justify-content: center; /* Centre les lettres horizontalement */
+  align-items: center; /* Centre les lettres verticalement */
+  flex-wrap: wrap; /* Permet aux lettres de sauter à la ligne si nécessaire */
+  gap: 10px 0; /* Espacement entre les lettres */
+  margin-bottom: 20px; /* Espacement sous les lettres */
+}
+
+.letter-box {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  border: 1px solid #000;
+  border-radius: 5px;
+  background-color: #ccc;
+}
+
+/* Filled letter */
+.filled {
+  background-color: #fff;
+  border: 1px solid #000;
+}
+
+/* Button container */
+.button-container {
+  text-align: center; /* Centre le bouton horizontalement */
+}
+/* Letters container */
+.letters-container {
+  display: flex;
+  flex-direction: column; /* Change la direction en colonne */
+  align-items: center; /* Centre les lettres horizontalement */
+  gap: 10px; /* Espacement entre les lignes */
+  margin-bottom: 20px; /* Espacement sous les lettres */
+}
+
+/* Letter row */
+.letter-row {
+  display: flex;
+  justify-content: center; /* Centre les lettres horizontalement dans chaque ligne */
+  gap: 10px; /* Espacement entre les lettres */
+}
+
+.letter-box {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  border: 1px solid #000;
+  border-radius: 5px;
+  background-color: #ccc;
+}
+
+/* Filled letter */
+.filled {
+  background-color: #fff;
+  border: 1px solid #000;
+}
