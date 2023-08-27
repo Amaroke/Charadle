@@ -54,7 +54,7 @@ const getRandomTopAnime = async () => {
   }
 };
 
-const getRandomCharacterImage = async (anime) => {
+const getRandomCharacterImageName = async (anime) => {
   try {
     const randomCharacter = await getRandomCharacter(anime);
     const randomIndex = Math.floor(Math.random() * randomCharacter.data.length);
@@ -88,14 +88,20 @@ const getRandomCharacter = async (anime) => {
   }
 };
 
-const getImageForCharacter = async (characterId) => {
+const getImageNameForCharacter = async (characterId) => {
   try {
     const characterUrl = `https://myanimelist.net/character/${characterId}`;
     const response = await axios.get(characterUrl);
     const $ = cheerio.load(response.data);
     const imageUrl = $('img.portrait-225x350').attr('data-src');
+    const name = $('h2.normal_header').text();
 
-    return imageUrl;
+    const characterImageName = {
+      imageUrl: imageUrl,
+      name: name
+    };
+    
+    return characterImageName;
   } catch (error) {
     console.error('Error while fetching character image:', error);
     throw error;
@@ -105,5 +111,5 @@ const getImageForCharacter = async (characterId) => {
 module.exports = {
   getRandomUserAnime,
   getRandomTopAnime,
-  getRandomCharacterImage,
+  getRandomCharacterImageName,
 };

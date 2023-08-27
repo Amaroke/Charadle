@@ -26,11 +26,11 @@ app.get('/randomTopAnime', async (req, res) => {
   }
 });
 
-app.get('/randomCharacterImage/:anime', async (req, res) => {
+app.get('/randomCharacterImageName/:anime', async (req, res) => {
   try {
     const anime = req.params.anime;
-    const randomCharacterImage = await animeController.getRandomCharacterImage(anime);
-    res.json(randomCharacterImage);
+    const randomCharacterImageName = await animeController.getRandomCharacterImageName(anime);
+    res.json(randomCharacterImageName);
   } catch (error) {
     console.error('Error while fetching random character image:', error);
     res.status(500).json({ error: 'Error retrieving random character image' });
