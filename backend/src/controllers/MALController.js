@@ -14,6 +14,7 @@ const getRandomUserAnime = async (username) => {
       params: {
         fields: 'list_status',
         limit: 1000,
+        status: 'completed',
       },
       headers: {
         'X-MAL-CLIENT-ID': MAL_CLIENT_ID,
@@ -60,7 +61,7 @@ const getRandomCharacterImageName = async (anime) => {
     const randomIndex = Math.floor(Math.random() * randomCharacter.data.length);
     const randomCharacterData = randomCharacter.data[randomIndex];
     const characterId = randomCharacterData.node.id;
-    const imageUrl = await getImageForCharacter(characterId);
+    const imageUrl = await getImageNameForCharacter(characterId);
     return imageUrl;
 
   } catch (error) {
