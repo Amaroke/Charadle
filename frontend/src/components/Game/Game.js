@@ -1,9 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, {  useState } from 'react';
 import "./Game.css"
 
 const Game = () => {
+
+    function fetchRandomTopAnime() {
+        const apiURL = "https://charadle.vercel.app/randomTopAnime";
+
+        fetch(apiURL, {mode: 'cors'})
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Erreur de requête : ${response.status}`);
+                }   
+                return response.json();
+            })
+            .then(data => {
+                const animeNumber = data.number; // Récupère le numéro de l'anime depuis la réponse JSON
+                console.log("Numéro de l'anime : " + animeNumber); // Affiche le numéro de l'anime dans la console
+            })
+            .catch(error => {
+                console.error(`Erreur : ${error.message}`);
+            });
+    }
+
     const [guess, setGuess] = useState('');
-    const [targetWord, setTargetWord] = useState('APPLE');
+    const [targetWord] = useState('APPLE');
     const [attempts, setAttempts] = useState(0);
     const [isGameOver, setIsGameOver] = useState(false);
 
@@ -34,33 +54,13 @@ const Game = () => {
 
     const keyboardLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
-    const [url, setUrl] = useState('');
-
-  useEffect(() => {
-    const apiURL = "https://charadle.vercel.app/randomTopAnime";
-
-    fetch(apiURL)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Erreur de requête : ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        const anime = data.anime;
-        const imageUrl = `https://charadle.vercel.app/randomCharacterImage/${anime}`;
-        setUrl(imageUrl); // Mettre à jour l'état avec l'URL
-      })
-      .catch(error => {
-        console.error(`Erreur : ${error.message}`);
-      });
-  }, []);
+    console.log(fetchRandomTopAnime());
 
     return (
         <div>
             <h1>Jeu Wordle</h1>
             <p>Devinez le mot de 5 lettres:</p>
-            <img href={url} alt="character" />
+            <img href={""} alt="character" />
             <form onSubmit={handleGuessSubmit}>
                 <input
                     type="text"
