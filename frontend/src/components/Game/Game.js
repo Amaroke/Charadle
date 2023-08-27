@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "./Game.css"
 
 const Game = () => {
@@ -34,10 +34,33 @@ const Game = () => {
 
     const keyboardLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
+    const [url, setUrl] = useState('');
+
+  useEffect(() => {
+    const apiURL = "https://charadle.vercel.app/randomTopAnime";
+
+    fetch(apiURL)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Erreur de requête : ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        const anime = data.anime;
+        const imageUrl = `https://charadle.vercel.app/randomCharacterImage/${anime}`;
+        setUrl(imageUrl); // Mettre à jour l'état avec l'URL
+      })
+      .catch(error => {
+        console.error(`Erreur : ${error.message}`);
+      });
+  }, []);
+
     return (
         <div>
             <h1>Jeu Wordle</h1>
             <p>Devinez le mot de 5 lettres:</p>
+            <img href={url} alt="character" />
             <form onSubmit={handleGuessSubmit}>
                 <input
                     type="text"
