@@ -2,35 +2,35 @@ const express = require('express');
 const app = express();
 const animeController = require('./src/controllers/MALController');
 
-app.get('/random-anime', async (req, res) => {
+app.get('/randomUserAnime/:user', async (req, res) => {
   try {
-    const randomAnime = await animeController.getRandomAnime();
-    res.json(randomAnime);
+    const user = req.params.user;
+    const randomUserAnime = await animeController.getRandomUserAnime(user);
+    res.json(randomUserAnime);
   } catch (error) {
-    console.error('Error while fetching random anime:', error);
-    res.status(500).json({ error: 'Error retrieving random anime' });
+    console.error('Error while fetching random user anime:', error);
+    res.status(500).json({ error: 'Error retrieving random anime from user list' });
   }
 });
 
-app.get('/random-character/:anime', async (req, res) => {
+app.get('/randomTopAnime', async (req, res) => {
+  try {
+    const randomTopAnime = await animeController.getRandomTopAnime();
+    res.json(randomTopAnime);
+  } catch (error) {
+    console.error('Error while fetching random top anime:', error);
+    res.status(500).json({ error: 'Error retrieving random anime from top list' });
+  }
+});
+
+app.get('/randomCharacterImage/:anime', async (req, res) => {
   try {
     const anime = req.params.anime;
-    const randomCharacter = await animeController.getRandomCharacterImage(anime);
-    res.json(randomCharacter);
+    const randomCharacterImage = await animeController.getRandomCharacterImage(anime);
+    res.json(randomCharacterImage);
   } catch (error) {
-    console.error('Error while fetching random character:', error);
-    res.status(500).json({ error: 'Error retrieving random character' });
-  }
-});
-
-app.get('/user/:username', async (req, res) => {
-  try {
-    const username = req.params.username;
-    const user = await userController.getUserList(username);
-    res.json(user);
-  } catch (error) {
-    console.error('Error while fetching user:', error);
-    res.status(500).json({ error: 'Error retrieving user' });
+    console.error('Error while fetching random character image:', error);
+    res.status(500).json({ error: 'Error retrieving random character image' });
   }
 });
 
