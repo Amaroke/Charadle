@@ -1,6 +1,9 @@
 const express = require('express');
+const cors = require("cors");
 const app = express();
 const animeController = require('./src/controllers/MALController');
+
+app.use(cors());
 
 app.get('/randomUserAnime/:user', async (req, res) => {
   try {
@@ -37,7 +40,6 @@ app.get('/randomCharacterImage/:anime', async (req, res) => {
 app.get('*', (req, res) => {
   res.status(404).json({ error: 'Resource not found' });
 });
-
 
 app.listen(5000, () => {
   console.log('Running on port 5000.');
