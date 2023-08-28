@@ -1,81 +1,128 @@
-.characterImage {
+.game-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 2%;
+}
+
+.image-container {
   position: relative;
-  background-position: center;
-  width: 200px;
-  width: 15%;
-  left: 50%;
-  transform: translate(-50%, 0%);
-  margin-bottom: 50px;
-  margin-top: 20px
-}
-
-/* Letters container */
-.letters-container {
   display: flex;
-  flex-direction: column; /* Change la direction en colonne */
-  justify-content: center; /* Centre les lettres horizontalement */
-  align-items: center; /* Centre les lettres verticalement */
-  flex-wrap: wrap; /* Permet aux lettres de sauter à la ligne si nécessaire */
-  gap: 10px 0; /* Espacement entre les lettres */
-  margin-bottom: 20px; /* Espacement sous les lettres */
-}
-
-.letter-box {
-  width: 30px;
-  height: 30px;
-  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  text-align: center;
-  font-size: 18px;
+  width: 25%;
+  height: 100%;
+}
+
+.characterImage {
+  width: 100%;
+  height: auto;
+  margin-bottom: 2%;
+}
+
+.characterImageLoading {
+  width: 25%;
+  height: auto;
+  margin-top: 50%;
+  margin-bottom: 50%;
+}
+
+.characterNameContainer {
+  white-space: nowrap;
+  font-size: 0;
+  display: inline; 
+}
+
+.characterName {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0;
+  font-size: 32px;
+  white-space: nowrap;
+  padding-left: 2%;
+}
+
+.characterName span {
+  display: inline;
+  margin: 0;
+  font-size: 32px;
+  white-space: nowrap;
   font-weight: bold;
-  border: 1px solid #000;
-  border-radius: 5px;
-  background-color: #ccc;
 }
 
-/* Filled letter */
-.filled {
-  background-color: #fff;
-  border: 1px solid #000;
+.fromP {
+  font-size: 16px;
 }
 
-/* Button container */
+.animeNameP {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.content-container {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .button-container {
-  text-align: center; /* Centre le bouton horizontalement */
-}
-/* Letters container */
-.letters-container {
-  display: flex;
-  flex-direction: column; /* Change la direction en colonne */
-  align-items: center; /* Centre les lettres horizontalement */
-  gap: 10px; /* Espacement entre les lignes */
-  margin-bottom: 20px; /* Espacement sous les lettres */
-}
-
-/* Letter row */
-.letter-row {
-  display: flex;
-  justify-content: center; /* Centre les lettres horizontalement dans chaque ligne */
-  gap: 10px; /* Espacement entre les lettres */
-}
-
-.letter-box {
-  width: 30px;
-  height: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   text-align: center;
-  font-size: 18px;
-  font-weight: bold;
-  border: 1px solid #000;
-  border-radius: 5px;
-  background-color: #ccc;
 }
 
-/* Filled letter */
-.filled {
+.character-info {
+  text-align: center;
+  color: transparent;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.blur-text {
+  filter: blur(5px);
+}
+
+.no-blur {
+  filter: none !important;
+  color: white !important;
+  text-shadow: none !important;
+}
+
+.input-field {
+  width: 80%;
+  padding: 10px;
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f4f4f4;
+  padding: 10px;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 10px 15px;
+  font-size: 16px;
   background-color: #fff;
-  border: 1px solid #000;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #ddd;
 }
