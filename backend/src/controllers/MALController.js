@@ -31,14 +31,14 @@ const getRandomUserAnime = async (username) => {
   }
 };
 
-const getRandomTopAnime = async () => {
+const getRandomTopAnime = async (top) => {
   try {
     const apiUrl = `${MAL_API_URL}anime/ranking`;
 
     const response = await axios.get(apiUrl, {
       params: {
-        ranking_type: 'all',
-        limit: 500,
+        ranking_type: 'bypopularity',
+        limit: top,
       },
       headers: {
         'X-MAL-CLIENT-ID': MAL_CLIENT_ID,

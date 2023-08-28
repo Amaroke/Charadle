@@ -16,9 +16,10 @@ app.get('/randomUserAnime/:user', async (req, res) => {
   }
 });
 
-app.get('/randomTopAnime', async (req, res) => {
+app.get('/randomTopAnime/:top', async (req, res) => {
   try {
-    const randomTopAnime = await animeController.getRandomTopAnime();
+    const top = req.params.top;
+    const randomTopAnime = await animeController.getRandomTopAnime(top);
     res.json(randomTopAnime);
   } catch (error) {
     console.error('Error while fetching random top anime:', error);

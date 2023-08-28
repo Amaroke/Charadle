@@ -13,7 +13,6 @@ const Game = ({ difficulty, currentList }) => {
 
     const revealAnime = () => {
         setIsAnimeNameBlurred(false);
-        setAreInitialsVisible(true);
     };
 
     const revealInitials = () => {
@@ -32,8 +31,12 @@ const Game = ({ difficulty, currentList }) => {
 
     useEffect(() => {
         function fetchRandomTopAnime() {
-            const apiURL = "https://charadle.vercel.app/randomUserAnime/Amaroke";
-
+            const apiURL = "https://charadle.vercel.app/randomTopAnime/10";
+            if (currentList === "top100") {
+                apiURL = "https://charadle.vercel.app/randomTopAnime/100";
+            } else {
+                apiURL = "https://charadle.vercel.app/randomUserAnime/Amaroke";
+            }
             fetch(apiURL)
                 .then(response => {
                     if (!response.ok) {
@@ -69,7 +72,17 @@ const Game = ({ difficulty, currentList }) => {
     }, []);
 
     const handleKeyPress = (key) => {
-        setInputText(prevText => prevText + key);
+        if (key === "remove") {
+            setInputText(prevText => prevText.slice(0, -1));
+        } else if (key === "validate") {
+            const listInput = inputText.split(' ');
+            const listCharacterName = characterName.split(' ');
+            if (listInput.some(motInput => listCharacterName.includes(motInput))) {
+                revealAll(true);
+            }
+        } else {
+            setInputText(prevText => prevText + key);
+        }
     };
 
     return (
@@ -119,11 +132,12 @@ const Game = ({ difficulty, currentList }) => {
                         ))}
                     </div>
                     <div className="keyboard-row">
-                        <button key={"enter"} onClick={() => handleKeyPress("enter")}>{"↲"}</button>
+
                         {['U', 'V', 'W', 'X', 'Y', 'Z'].map(letter => (
                             <button key={letter} onClick={() => handleKeyPress(letter)}>{letter}</button>
                         ))}
                         <button key={"remove"} onClick={() => handleKeyPress("remove")}>{"←"}</button>
+                        <button key={"enter"} onClick={() => handleKeyPress("validate")}>{"Validate"}</button>
                     </div>
                 </div>
                 <div className="hints">
