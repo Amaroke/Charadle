@@ -52,7 +52,7 @@ function Header({ difficulty, currentList, setDifficulty, setCurrentList }) {
                                 onChange={handleCurrentListChange}
                                 className="select"
                             >
-                                {currentList !== null && currentList.trim() !== '' && currentList !== "top10" && currentList !== "top100" ? <option value={currentList}>{currentList}</option> : null}
+                                {currentList !== null && currentList !== "top10" && currentList !== "top100" ? <option value={currentList}>{currentList}</option> : null}
                                 <option value="top10">Top 10</option>
                                 <option value="top100">Top 100</option>
                                 <option value="newList">Use MAL Account</option>
