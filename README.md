@@ -1,9 +1,11 @@
 # Charadle
 
-TODO : On arrive on doit saisir notre username
-Ça le fou dans un cookie ?
-UTILISER QUE LA LISTE DES TODO si on use notre pseudo
-Ou choisir top 100 anime
-On doit deviner en mode wordle
-Une fois trouvé ou échoué (5 tentatives ?)
-On peut deviner un autre perso du même animé ou changer d'anime
+Faire un pop up de bienvenue (+ cookies)
+Au lieu de l'alerte modifier un peu le pop up de bienvenue en retirant le bienvenue
+Changer les paramètres en haut à droite par une roue de paramètre qui ouvre ce même pop up de modification
+
+Meilleure gestion de victoire/défaite (nb limite de tentatives ? afficher les tentatives ?)
+
+Editer API (pour les params) + gestion du jeu
+
+revoir front keyboard & cie

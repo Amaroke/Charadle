@@ -8,18 +8,18 @@ import Cookies from 'js-cookie';
 
 function App() {
   const [difficulty, setDifficulty] = useState(null);
-  const [userChoice, setUserChoice] = useState(null);
+  const [currentList, setCurrentList] = useState(null);
 
   useEffect(() => {
     const difficultyFromCookie = Cookies.get('difficulty');
-    const userChoiceFromCookie = Cookies.get('userChoice');
+    const currentListFromCookie = Cookies.get('currentList');
 
     if (difficultyFromCookie) {
       setDifficulty(difficultyFromCookie);
     }
 
-    if (userChoiceFromCookie) {
-      setUserChoice(userChoiceFromCookie);
+    if (currentListFromCookie) {
+      setCurrentList(currentListFromCookie);
     }
   }, []);
 
@@ -30,29 +30,29 @@ function App() {
   }, [difficulty]);
 
   useEffect(() => {
-    if (userChoice) {
-      Cookies.set('userChoice', userChoice, { expires: 365 });
+    if (currentList) {
+      Cookies.set('currentList', currentList, { expires: 365 });
     }
-  }, [userChoice]);
+  }, [currentList]);
 
   return (
     <div className="App">
       <Header
         difficulty={difficulty}
-        userChoice={userChoice}
+        currentList={currentList}
         setDifficulty={setDifficulty}
-        setUserChoice={setUserChoice}
+        setCurrentList={setCurrentList}
       />
       <Game
         difficulty={difficulty}
-        userChoice={userChoice}
+        currentList={currentList}
       />
       <Footer />
       <Popup
         difficulty={difficulty}
-        userChoice={userChoice}
+        currentList={currentList}
         setDifficulty={setDifficulty}
-        setUserChoice={setUserChoice}
+        setCurrentList={setCurrentList}
       />
     </div>
   );

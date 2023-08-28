@@ -2,15 +2,21 @@ import React from 'react';
 import './Header.css';
 import logo from '../../assets/images/logo.png';
 
-function Header({ difficulty, userChoice, setDifficulty, setUserChoice }) {
+function Header({ difficulty, currentList, setDifficulty, setCurrentList }) {
+
     const handleDifficultyChange = (event) => {
-        const newDifficulty = event.target.value;
-        setDifficulty(newDifficulty);
+        setDifficulty(event.target.value);
     };
 
-    const handleUserChoiceChange = (event) => {
-        const newUserChoice = event.target.value;
-        setUserChoice(newUserChoice);
+    const handleCurrentListChange = (event) => {
+        if (event.target.value === 'newList') {
+            const pseudo = window.prompt('MAL account to use :');
+            if (pseudo !== null) {
+                setCurrentList(pseudo);
+            }
+        } else {
+            setCurrentList(event.target.value);
+        }
     };
 
     return (
@@ -23,30 +29,31 @@ function Header({ difficulty, userChoice, setDifficulty, setUserChoice }) {
                     </li>
                     <div className='parameters'>
                         <li className="nav-item">
-                            <label className="label" htmlFor="difficultySelect">Difficulté :</label>
+                            <label className="label" htmlFor="difficultySelect">Difficulty :</label>
                             <select
                                 id="difficultySelect"
                                 value={difficulty}
                                 onChange={handleDifficultyChange}
                                 className="select"
                             >
-                                <option value="easy">Facile</option>
-                                <option value="advanced">Avancé</option>
+                                <option value="easy">Easy</option>
+                                <option value="advanced">Advanced</option>
                                 <option value="expert">Expert</option>
                             </select>
                         </li>
                         <label className="label-spacing"></label>
                         <li className="nav-item">
-                            <label className="label" htmlFor="choiceSelect">Choix Affiché :</label>
+                            <label className="label" htmlFor="choiceSelect">Current list :</label>
                             <select
                                 id="choiceSelect"
-                                value={userChoice}
-                                onChange={handleUserChoiceChange}
+                                value={currentList}
+                                onChange={handleCurrentListChange}
                                 className="select"
                             >
-                                <option value="pseudo">Pseudo</option>
+                                {currentList !== null && currentList.trim() !== '' && currentList !== "top10" && currentList !== "top100" ? <option value={currentList}>{currentList}</option> : null}
                                 <option value="top10">Top 10</option>
                                 <option value="top100">Top 100</option>
+                                <option value="newList">Use MAL Account</option>
                             </select>
                         </li>
                     </div>

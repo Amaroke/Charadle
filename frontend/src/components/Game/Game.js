@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import characterImageLoading from '../../assets/images/characterImageLoading.gif';
 import './Game.css';
 
-const Game = () => {
+const Game = ({ difficulty, currentList }) => {
     const [characterImage, setCharacterImage] = useState(null);
     const [characterName, setCharacterName] = useState("loading");
     const [animeName, setAnimeName] = useState("loading");
