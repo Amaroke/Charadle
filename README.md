@@ -6,6 +6,6 @@ Changer les paramètres en haut à droite par une roue de paramètre qui ouvre c
 
 Meilleure gestion de victoire/défaite (nb limite de tentatives ? afficher les tentatives ?)
 
-Editer API (pour les params) + gestion du jeu
+Editer API (pour les params (Difficulté et récupérer tous les surnoms)) + gestion du jeu
 
 revoir front keyboard & cie

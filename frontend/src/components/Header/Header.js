@@ -13,9 +13,11 @@ function Header({ difficulty, currentList, setDifficulty, setCurrentList }) {
             const pseudo = window.prompt('MAL account to use :');
             if (pseudo !== null) {
                 setCurrentList(pseudo);
+                window.location.reload();
             }
         } else {
             setCurrentList(event.target.value);
+            window.location.reload();
         }
     };
 

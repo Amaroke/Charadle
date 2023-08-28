@@ -7,21 +7,8 @@ import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 
 function App() {
-  const [difficulty, setDifficulty] = useState(null);
-  const [currentList, setCurrentList] = useState(null);
-
-  useEffect(() => {
-    const difficultyFromCookie = Cookies.get('difficulty');
-    const currentListFromCookie = Cookies.get('currentList');
-
-    if (difficultyFromCookie) {
-      setDifficulty(difficultyFromCookie);
-    }
-
-    if (currentListFromCookie) {
-      setCurrentList(currentListFromCookie);
-    }
-  }, []);
+  const [difficulty, setDifficulty] = useState(Cookies.get('difficulty'));
+  const [currentList, setCurrentList] = useState(Cookies.get('currentList'));
 
   useEffect(() => {
     if (difficulty) {

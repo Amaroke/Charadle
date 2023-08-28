@@ -31,11 +31,13 @@ const Game = ({ difficulty, currentList }) => {
 
     useEffect(() => {
         function fetchRandomTopAnime() {
-            const apiURL = "https://charadle.vercel.app/randomTopAnime/10";
-            if (currentList === "top100") {
+            let apiURL;
+            if (currentList === "top10" || currentList === null) {
+                apiURL = "https://charadle.vercel.app/randomTopAnime/100";
+            } else if (currentList === "top100") {
                 apiURL = "https://charadle.vercel.app/randomTopAnime/100";
             } else {
-                apiURL = "https://charadle.vercel.app/randomUserAnime/Amaroke";
+                apiURL = "https://charadle.vercel.app/randomUserAnime/" + currentList;
             }
             fetch(apiURL)
                 .then(response => {
@@ -69,7 +71,7 @@ const Game = ({ difficulty, currentList }) => {
         }
 
         fetchRandomTopAnime();
-    }, []);
+    }, [currentList]);
 
     const handleKeyPress = (key) => {
         if (key === "remove") {
