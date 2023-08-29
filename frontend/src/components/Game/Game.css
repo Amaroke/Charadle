@@ -75,7 +75,7 @@
 .character-info {
   text-align: center;
   color: transparent;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 1);
 }
 
 .blur-text {

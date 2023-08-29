@@ -1,0 +1,37 @@
+.petal1 {
+    position: absolute;
+    width: 20px;
+    height: 18px;
+    background-image: url('./assets/images/petal1.png');
+    animation: fall 10s linear infinite;
+    z-index: -10000;
+}
+
+.petal2 {
+    position: absolute;
+    width: 14px;
+    height: 20px;
+    background-image: url('./assets/images/petal2.png');
+    animation: fall 10s linear infinite;
+    z-index: -10000;
+}
+
+.petal3 {
+    position: absolute;
+    width: 20px;
+    height: 15px;
+    background-image: url('./assets/images/petal3.png');
+    animation: fall 10s linear infinite;
+    z-index: -10000;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(90vh);
+        opacity: 0;
+    }
+}

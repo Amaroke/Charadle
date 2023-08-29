@@ -93,11 +93,10 @@ const Game = ({ difficulty, currentList }) => {
             const listInput = inputText.split(' ');
             const characterAllNamesWithoutQuotes = characterAllNames.replace(/"/g, '').replace(/,/g, '');
             const listCharacterName = characterAllNamesWithoutQuotes.split(' ');
-            const filteredListCharacterName = listCharacterName.filter(word => word.length >= 4);
-            filteredListCharacterName.push(characterName);
-            console.log(filteredListCharacterName);
+            listCharacterName.push(characterName);
+            console.log(listCharacterName);
             const lowercaseListInput = listInput.map(motInput => motInput.toLowerCase());
-            const lowercaseFilteredListCharacterName = filteredListCharacterName.map(characterName => characterName.toLowerCase());
+            const lowercaseFilteredListCharacterName = listCharacterName.map(characterName => characterName.toLowerCase());
             if (lowercaseListInput.some(motInput => lowercaseFilteredListCharacterName.includes(motInput))) {
                 winGame();
             } else {
