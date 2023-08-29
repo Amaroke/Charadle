@@ -22,7 +22,7 @@
 }
 
 .characterImageLoading {
-  width: 25%;
+  width: 57%;
   height: auto;
   margin-top: 50%;
   margin-bottom: 50%;
@@ -99,11 +99,10 @@
 .keyboard {
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 70%;
   margin-top: 20px;
-  border: 1px solid #ccc;
   border-radius: 5px;
-  background-color: #f4f4f4;
+  background-color: transparent;
   padding: 10px;
 }
 
@@ -113,16 +112,72 @@
   margin-bottom: 10px;
 }
 
-button {
+.keyboard-row button {
+  width: 10%;
   padding: 10px 15px;
   font-size: 16px;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  background-color: #636363;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-right: 0.5%;
+  color: #ffffff;
+  border: none;
+  box-shadow: 5px 5px 5px 0 rgba(0, 0, 0, 0.5);
+}
+
+.button-large {
+  width: 20% !important;
+  padding: 10px 15px;
+  font-size: 16px;
+  background-color: #636363;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 0.5%;
+  color: #ffffff;
+  border: none;
+  box-shadow: 5px 5px 5px 0 rgba(0, 0, 0, 0.5);
+}
+
+.keyboard-hints {
+  display: flex;
+  justify-content: space-between;
+}
+
+.keyboard-hints button {
+  margin-top: 5%;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #636363;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  color: #ffffff;
+  border: none;
+  box-shadow: 5px 5px 5px 0 rgba(0, 0, 0, 0.5);
 }
 
 button:hover {
-  background-color: #ddd;
+  background-color: #5a5a5a;
+}
+
+.remove-button-icon {
+  background-image: url('../../assets/images/remove-button.png');
+  background-size: cover;
+  width: 22px;
+  height: 14px;
+  display: inline-block;
+}
+
+.enter-button-icon {
+  background-image: url('../../assets/images/enter-button.png');
+  background-size: cover;
+  width: 25px;
+  height: 15px;
+  display: inline-block;
+}
+
+.give-another {
+  width: 25% !important;
 }

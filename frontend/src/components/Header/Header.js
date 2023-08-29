@@ -6,6 +6,7 @@ function Header({ difficulty, currentList, setDifficulty, setCurrentList }) {
 
     const handleDifficultyChange = (event) => {
         setDifficulty(event.target.value);
+        window.location.reload();
     };
 
     const handleCurrentListChange = (event) => {

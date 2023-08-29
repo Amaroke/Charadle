@@ -3,9 +3,9 @@ import characterImageLoading from '../../assets/images/characterImageLoading.gif
 import './Game.css';
 
 const Game = ({ difficulty, currentList }) => {
-    const [animeName, setAnimeName] = useState("loading");
+    const [animeName, setAnimeName] = useState("Loading...");
     const [characterImage, setCharacterImage] = useState(null);
-    const [characterName, setCharacterName] = useState("loading");
+    const [characterName, setCharacterName] = useState("Loading...");
     const [characterAllNames, setCharacterAllNames] = useState([]);
 
     const [isAnimeNameBlurred, setIsAnimeNameBlurred] = useState(true);
@@ -84,7 +84,7 @@ const Game = ({ difficulty, currentList }) => {
         }
 
         fetchRandomTopAnime();
-    }, [currentList]);
+    }, [currentList, difficulty]);
 
     const handleKeyPress = (key) => {
         if (key === "remove") {
@@ -93,7 +93,9 @@ const Game = ({ difficulty, currentList }) => {
             const listInput = inputText.split(' ');
             const characterAllNamesWithoutQuotes = characterAllNames.replace(/"/g, '').replace(/,/g, '');
             const listCharacterName = characterAllNamesWithoutQuotes.split(' ');
-            const filteredListCharacterName = listCharacterName.filter(word => word.length >= 3);
+            const filteredListCharacterName = listCharacterName.filter(word => word.length >= 4);
+            filteredListCharacterName.push(characterName);
+            console.log(filteredListCharacterName);
             const lowercaseListInput = listInput.map(motInput => motInput.toLowerCase());
             const lowercaseFilteredListCharacterName = filteredListCharacterName.map(characterName => characterName.toLowerCase());
             if (lowercaseListInput.some(motInput => lowercaseFilteredListCharacterName.includes(motInput))) {
@@ -130,7 +132,6 @@ const Game = ({ difficulty, currentList }) => {
                             </div>
                         ))}
                     </div>
-                    <p className="fromP no-blur">FROM</p>
                     <p className={isAnimeNameBlurred ? "animeNameP blur-text" : "animeNameP no-blur"}>{animeName}</p>
                 </div>
                 <input
@@ -143,31 +144,36 @@ const Game = ({ difficulty, currentList }) => {
 
                 <div className="keyboard">
                     <div className="keyboard-row">
-                        {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'].map(letter => (
+                        {['A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'].map(letter => (
                             <button key={letter} onClick={() => handleKeyPress(letter)}>{letter}</button>
                         ))}
                     </div>
                     <div className="keyboard-row">
-                        {['K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'].map(letter => (
+                        {['Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M'].map(letter => (
                             <button key={letter} onClick={() => handleKeyPress(letter)}>{letter}</button>
                         ))}
                     </div>
                     <div className="keyboard-row">
+                        <button className="button-large" key="enter" onClick={() => handleKeyPress("validate")}>
+                            <span className="enter-button-icon"></span>
+                        </button>
 
-                        {['U', 'V', 'W', 'X', 'Y', 'Z'].map(letter => (
+                        {['W', 'X', 'C', 'V', 'B', 'N'].map(letter => (
                             <button key={letter} onClick={() => handleKeyPress(letter)}>{letter}</button>
                         ))}
-                        <button key={"remove"} onClick={() => handleKeyPress("remove")}>{"←"}</button>
+                        <button className="button-large" key={"remove"} onClick={() => handleKeyPress("remove")}><span className="remove-button-icon"></span></button>
+
+                    </div>
+                    <div className="keyboard-hints">
+                        <button onClick={revealAnime}>Reveal the Anime</button>
+                        <button onClick={revealInitials}>Show the initial(s)</button>
+                        {isGameFinished ? <button className="give-another" onClick={nextGame}>Another game !</button> : <button className="give-another" onClick={revealAll}>Give up !</button>}
                         <button key={"enter"} onClick={() => handleKeyPress("validate")}>{"Validate"}</button>
                     </div>
                 </div>
-                <div className="hints">
-                    <button onClick={revealAnime}>Reveal the Anime</button>
-                    <button onClick={revealInitials}>Show the initial(s)</button>
-                    {isGameFinished ? <button onClick={nextGame}>Another game !</button> : <button onClick={revealAll}>Give up !</button>}
-                </div>
+
             </div>
-        </div>
+        </div >
     );
 };
 
