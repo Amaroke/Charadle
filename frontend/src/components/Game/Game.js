@@ -169,7 +169,7 @@ const Game = ({ difficulty, currentList }) => {
                         {isGameFinished ? <button className="give-another" onClick={nextGame}>Another game !</button> : <button className="give-another" key={"enter"} onClick={() => handleKeyPress("validate")}>{"Validate"}</button>}
                     </div>
                     <h1 className={isGameFinished ? isGameWon ? "won" : "failed" : ""}>
-                        {isGameFinished ? isGameWon ? "You Won !" : "You Failed !" : isTentativeFailed ? "Retry..." : " "}
+                        {isGameFinished ? isGameWon ? "You Won !" : "You Failed !" : isTentativeFailed ? "Try Again !" : " "}
                     </h1>
                 </div>
 

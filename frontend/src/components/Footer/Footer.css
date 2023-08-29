@@ -1,5 +1,5 @@
 .footer {
-  padding: 0.3% 0;
+  padding: 0.1% 0;
   background-color: #1d1d20;
   background-position: center center;
   background-size: cover;
@@ -20,4 +20,10 @@
 .footer .copyright {
   font-size: 12px;
   color: #fff;
+  text-align: center;
+}
+
+a {
+  color: #feb9ce;
+  text-decoration: none;
 }
