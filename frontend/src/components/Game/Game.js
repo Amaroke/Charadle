@@ -60,10 +60,10 @@ const Game = ({ difficulty, currentList }) => {
                     }
                     return response.json();
                 })
-                .then(data => {  
+                .then(data => {
                     const animeID = data.id;
                     setAnimeName(data.title);
-                    
+
                     const nouvelleURL = `https://charadle.vercel.app/randomCharacterInformations/${animeID}/${difficulty}`;
                     return fetch(nouvelleURL);
                 })
@@ -108,10 +108,10 @@ const Game = ({ difficulty, currentList }) => {
         <div className="game-container">
             <div className="image-container">
                 {
-                    characterImage == null ?
-                        <img src={characterImageLoading} className="characterImage characterImageLoading" alt="characterloading" />
-                        :
+                    characterImage ?
                         <img src={characterImage} className="characterImage" alt="character" />
+                        :
+                        <img src={characterImageLoading} className="characterImage characterImageLoading" alt="characterloading" />
                 }
             </div>
             <div className="content-container">

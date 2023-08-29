@@ -15,7 +15,7 @@ function App() {
       setDifficulty(storedDifficulty);
     }
   }, []);
-  
+
   useEffect(() => {
     const storedCurrentList = Cookies.get('currentList');
     if (storedCurrentList) {
