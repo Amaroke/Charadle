@@ -162,6 +162,10 @@ button:hover {
   background-color: #5a5a5a;
 }
 
+button:disabled {
+  background-color: #404040;
+}
+
 .remove-button-icon {
   background-image: url('../../assets/images/remove-button.png');
   background-size: cover;
@@ -180,4 +184,20 @@ button:hover {
 
 .give-another {
   width: 25% !important;
+}
+
+h1 {
+  color: white;
+  text-align: center;
+  font-size: 3em;
+  min-height: 30px;
+  max-height: 30px;
+}
+
+h1.won {
+  color: lightgreen !important;
+}
+
+h1.failed {
+  color: red !important;
 }

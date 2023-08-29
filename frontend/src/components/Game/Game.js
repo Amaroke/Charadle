@@ -11,7 +11,6 @@ const Game = ({ difficulty, currentList }) => {
     const [isAnimeNameBlurred, setIsAnimeNameBlurred] = useState(true);
     const [areInitialsVisible, setAreInitialsVisible] = useState(false);
     const [isGameFinished, setIsGameFinished] = useState(false);
-    const [isGameLost, setIsGameLost] = useState(false);
     const [isGameWon, setIsGameWon] = useState(false);
     const [isTentativeFailed, setIsTentativeFailed] = useState(false);
 
@@ -26,7 +25,7 @@ const Game = ({ difficulty, currentList }) => {
     };
 
     const revealAll = () => {
-        setIsGameLost(true);
+        setIsGameWon(false);
         setIsAnimeNameBlurred(false);
         setAreInitialsVisible(true);
         setIsGameFinished(true);
@@ -94,8 +93,8 @@ const Game = ({ difficulty, currentList }) => {
             const characterAllNamesWithoutQuotes = characterAllNames.replace(/"/g, '').replace(/,/g, '');
             const listCharacterName = characterAllNamesWithoutQuotes.split(' ');
             listCharacterName.push(characterName);
-            console.log(listCharacterName);
-            const lowercaseListInput = listInput.map(motInput => motInput.toLowerCase());
+            let lowercaseListInput = listInput.map(motInput => motInput.toLowerCase());
+            lowercaseListInput = lowercaseListInput.filter(word => word.length >= 3);
             const lowercaseFilteredListCharacterName = listCharacterName.map(characterName => characterName.toLowerCase());
             if (lowercaseListInput.some(motInput => lowercaseFilteredListCharacterName.includes(motInput))) {
                 winGame();
@@ -164,11 +163,14 @@ const Game = ({ difficulty, currentList }) => {
 
                     </div>
                     <div className="keyboard-hints">
-                        <button onClick={revealAnime}>Reveal the Anime</button>
-                        <button onClick={revealInitials}>Show the initial(s)</button>
-                        {isGameFinished ? <button className="give-another" onClick={nextGame}>Another game !</button> : <button className="give-another" onClick={revealAll}>Give up !</button>}
-                        <button key={"enter"} onClick={() => handleKeyPress("validate")}>{"Validate"}</button>
+                        <button onClick={revealAnime} disabled={isAnimeNameBlurred ? false : true}>Reveal the Anime</button>
+                        <button onClick={revealInitials} disabled={areInitialsVisible ? true : false}>Show the initial(s)</button>
+                        <button onClick={revealAll} disabled={isGameFinished ? true : false}>Give up !</button>
+                        {isGameFinished ? <button className="give-another" onClick={nextGame}>Another game !</button> : <button className="give-another" key={"enter"} onClick={() => handleKeyPress("validate")}>{"Validate"}</button>}
                     </div>
+                    <h1 className={isGameFinished ? isGameWon ? "won" : "failed" : ""}>
+                        {isGameFinished ? isGameWon ? "You Won !" : "You Failed !" : isTentativeFailed ? "Retry..." : " "}
+                    </h1>
                 </div>
 
             </div>

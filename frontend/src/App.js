@@ -16,7 +16,7 @@ function App() {
     for (let i = 0; i < 50; i++) {
       generatedPetals.push({
         type: Math.floor(Math.random() * 3) + 1,
-        left: Math.random() * window.innerWidth*0.90 + 'px',
+        left: Math.random() * window.innerWidth*0.98 + 'px',
         animationDelay: Math.random() * 10 + 's',
       });
     }

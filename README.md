@@ -1,7 +1,5 @@
 # Charadle
 
-Meilleure gestion de l'affichage victoire/défaite 
-
 Faire un pop up de bienvenue
 Présentation du jeu des difficultés et des règles
 Choix de la difficulté
@@ -11,4 +9,3 @@ Roue des paramètres qui réouvre le POP UP de configuration
 
 Marge d'erreur acceptable ? 
 Nom anglais de l'animé
-Bouton validate pour next
