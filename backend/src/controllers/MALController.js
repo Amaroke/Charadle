@@ -1,9 +1,8 @@
 const axios = require('axios');
 const dotenv = require('dotenv');
 dotenv.config();
-
-const MAL_API_URL = 'https://api.myanimelist.net/v2/';
 const cheerio = require('cheerio');
+const MAL_API_URL = 'https://api.myanimelist.net/v2/';
 const MAL_CLIENT_ID = process.env.MAL_CLIENT_ID;
 
 const getRandomUserAnime = async (username) => {
@@ -23,7 +22,11 @@ const getRandomUserAnime = async (username) => {
 
     const userAnimeList = response.data.data;
     const randomIndex = Math.floor(Math.random() * userAnimeList.length);
-    return userAnimeList[randomIndex].node.id + ' ' + userAnimeList[randomIndex].node.title;
+    const animeData = {
+      id: userAnimeList[randomIndex].node.id,
+      title: userAnimeList[randomIndex].node.title
+    };
+    return animeData;
 
   } catch (error) {
     console.error('Error while fetching random anime from user list :', error);
@@ -45,9 +48,13 @@ const getRandomTopAnime = async (top) => {
       },
     });
 
-    const animeData = response.data.data;
-    const randomIndex = Math.floor(Math.random() * animeData.length);
-    return animeData[randomIndex].node.id + ' ' + animeData[randomIndex].node.title;
+    const topAnimeList = response.data.data;
+    const randomIndex = Math.floor(Math.random() * topAnimeList.length);
+    const animeData = {
+      id: topAnimeList[randomIndex].node.id,
+      title: topAnimeList[randomIndex].node.title
+    };
+    return animeData;
 
   } catch (error) {
     console.error('Error while fetching random anime :', error);
@@ -55,13 +62,26 @@ const getRandomTopAnime = async (top) => {
   }
 };
 
-const getRandomCharacterImageName = async (anime) => {
+const getRandomCharacterInformations = async (anime, difficulty) => {
   try {
-    const randomCharacter = await getRandomCharacter(anime);
-    const randomIndex = Math.floor(Math.random() * randomCharacter.data.length);
-    const randomCharacterData = randomCharacter.data[randomIndex];
-    const characterId = randomCharacterData.node.id;
-    const imageUrl = await getImageNameForCharacter(characterId);
+    const randomCharacters = await getRandomCharacters(anime);
+    let characterId;
+
+    if (difficulty === 'easy') {
+      const randomCharacterData = randomCharacters.data[0];
+      characterId = randomCharacterData.node.id;
+    } else if (difficulty === 'advanced') {
+      const mainCharacters = randomCharacters.data.filter(character => character.role === 'Main');
+      const randomIndex = Math.floor(Math.random() * mainCharacters.length);
+      const randomCharacterData = mainCharacters[randomIndex];
+      characterId = randomCharacterData.node.id;
+    } else {
+      const randomIndex = Math.floor(Math.random() * randomCharacters.data.length);
+      const randomCharacterData = randomCharacters.data[randomIndex];
+      characterId = randomCharacterData.node.id;
+    }
+
+    const imageUrl = await getCharacterInformations(characterId);
     return imageUrl;
 
   } catch (error) {
@@ -70,7 +90,7 @@ const getRandomCharacterImageName = async (anime) => {
   }
 };
 
-const getRandomCharacter = async (anime) => {
+const getRandomCharacters = async (anime) => {
   try {
     const apiUrl = `${MAL_API_URL}anime/${anime}/characters`;
 
@@ -80,8 +100,8 @@ const getRandomCharacter = async (anime) => {
       },
     });
 
-    const randomCharacter = response.data;
-    return randomCharacter;
+    const randomCharacters = response.data;
+    return randomCharacters;
 
   } catch (error) {
     console.error('Error while fetching random character :', error);
@@ -89,20 +109,22 @@ const getRandomCharacter = async (anime) => {
   }
 };
 
-const getImageNameForCharacter = async (characterId) => {
+const getCharacterInformations = async (characterId) => {
   try {
     const characterUrl = `https://myanimelist.net/character/${characterId}`;
     const response = await axios.get(characterUrl);
     const $ = cheerio.load(response.data);
     const imageUrl = $('img.portrait-225x350').attr('data-src');
     const name = $('h2.normal_header').text();
+    const allNames = $('h1.title-name').text();
 
-    const characterImageName = {
+    const characterInformations = {
       imageUrl: imageUrl,
-      name: name
+      name: name,
+      allNames: allNames
     };
-    
-    return characterImageName;
+
+    return characterInformations;
   } catch (error) {
     console.error('Error while fetching character image:', error);
     throw error;
@@ -112,5 +134,5 @@ const getImageNameForCharacter = async (characterId) => {
 module.exports = {
   getRandomUserAnime,
   getRandomTopAnime,
-  getRandomCharacterImageName,
+  getRandomCharacterInformations,
 };
