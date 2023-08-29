@@ -91,10 +91,12 @@ const Game = ({ difficulty, currentList }) => {
             setInputText(prevText => prevText.slice(0, -1));
         } else if (key === "validate") {
             const listInput = inputText.split(' ');
-            const characterAllNamesWithoutQuotes = characterAllNames.replace(/"/g, '');
+            const characterAllNamesWithoutQuotes = characterAllNames.replace(/"/g, '').replace(/,/g, '');
             const listCharacterName = characterAllNamesWithoutQuotes.split(' ');
             const filteredListCharacterName = listCharacterName.filter(word => word.length >= 3);
-            if (listInput.some(motInput => filteredListCharacterName.includes(motInput))) {
+            const lowercaseListInput = listInput.map(motInput => motInput.toLowerCase());
+            const lowercaseFilteredListCharacterName = filteredListCharacterName.map(characterName => characterName.toLowerCase());
+            if (lowercaseListInput.some(motInput => lowercaseFilteredListCharacterName.includes(motInput))) {
                 winGame();
             } else {
                 setIsTentativeFailed(true);
