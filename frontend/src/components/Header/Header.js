@@ -1,6 +1,6 @@
 import React from 'react';
-import './Header.css';
 import logo from '../../assets/images/logo.png';
+import './Header.css';
 
 function Header({ difficulty, currentList, setDifficulty, setCurrentList }) {
 

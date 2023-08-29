@@ -3,13 +3,19 @@ import characterImageLoading from '../../assets/images/characterImageLoading.gif
 import './Game.css';
 
 const Game = ({ difficulty, currentList }) => {
+    const [animeName, setAnimeName] = useState("loading");
     const [characterImage, setCharacterImage] = useState(null);
     const [characterName, setCharacterName] = useState("loading");
-    const [animeName, setAnimeName] = useState("loading");
-    const [inputText, setInputText] = useState('');
+    const [characterAllNames, setCharacterAllNames] = useState([]);
+
     const [isAnimeNameBlurred, setIsAnimeNameBlurred] = useState(true);
     const [areInitialsVisible, setAreInitialsVisible] = useState(false);
     const [isGameFinished, setIsGameFinished] = useState(false);
+    const [isGameLost, setIsGameLost] = useState(false);
+    const [isGameWon, setIsGameWon] = useState(false);
+    const [isTentativeFailed, setIsTentativeFailed] = useState(false);
+
+    const [inputText, setInputText] = useState('');
 
     const revealAnime = () => {
         setIsAnimeNameBlurred(false);
@@ -20,6 +26,14 @@ const Game = ({ difficulty, currentList }) => {
     };
 
     const revealAll = () => {
+        setIsGameLost(true);
+        setIsAnimeNameBlurred(false);
+        setAreInitialsVisible(true);
+        setIsGameFinished(true);
+    };
+
+    const winGame = () => {
+        setIsGameWon(true);
         setIsAnimeNameBlurred(false);
         setAreInitialsVisible(true);
         setIsGameFinished(true);
@@ -33,7 +47,7 @@ const Game = ({ difficulty, currentList }) => {
         function fetchRandomTopAnime() {
             let apiURL;
             if (currentList === "top10" || currentList === null) {
-                apiURL = "https://charadle.vercel.app/randomTopAnime/100";
+                apiURL = "https://charadle.vercel.app/randomTopAnime/10";
             } else if (currentList === "top100") {
                 apiURL = "https://charadle.vercel.app/randomTopAnime/100";
             } else {
@@ -46,11 +60,11 @@ const Game = ({ difficulty, currentList }) => {
                     }
                     return response.json();
                 })
-                .then(data => {
-                    const dataSplit = data.split(' ');
-                    const animeID = dataSplit[0];
-                    setAnimeName(dataSplit.slice(1).join(' '));
-                    const nouvelleURL = `https://charadle.vercel.app/randomCharacterImageName/${animeID}`;
+                .then(data => {  
+                    const animeID = data.id;
+                    setAnimeName(data.title);
+                    
+                    const nouvelleURL = `https://charadle.vercel.app/randomCharacterInformations/${animeID}/${difficulty}`;
                     return fetch(nouvelleURL);
                 })
                 .then(response => {
@@ -61,9 +75,8 @@ const Game = ({ difficulty, currentList }) => {
                 })
                 .then(data => {
                     setCharacterImage(data.imageUrl);
-                    const characterInfo = data.name.split('(');
-                    setCharacterName(characterInfo[0]);
-
+                    setCharacterName(data.name.replace(/\([^)]*\)/g, ''));
+                    setCharacterAllNames(data.allNames);
                 })
                 .catch(error => {
                     console.error(`Erreur : ${error.message}`);
@@ -78,9 +91,13 @@ const Game = ({ difficulty, currentList }) => {
             setInputText(prevText => prevText.slice(0, -1));
         } else if (key === "validate") {
             const listInput = inputText.split(' ');
-            const listCharacterName = characterName.split(' ');
-            if (listInput.some(motInput => listCharacterName.includes(motInput))) {
-                revealAll(true);
+            const characterAllNamesWithoutQuotes = characterAllNames.replace(/"/g, '');
+            const listCharacterName = characterAllNamesWithoutQuotes.split(' ');
+            const filteredListCharacterName = listCharacterName.filter(word => word.length >= 3);
+            if (listInput.some(motInput => filteredListCharacterName.includes(motInput))) {
+                winGame();
+            } else {
+                setIsTentativeFailed(true);
             }
         } else {
             setInputText(prevText => prevText + key);

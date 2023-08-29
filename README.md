@@ -1,11 +1,12 @@
 # Charadle
 
-Faire un pop up de bienvenue (+ cookies)
-Au lieu de l'alerte modifier un peu le pop up de bienvenue en retirant le bienvenue
-Changer les paramètres en haut à droite par une roue de paramètre qui ouvre ce même pop up de modification
+Revoir front keyboard & cie
 
-Meilleure gestion de victoire/défaite (nb limite de tentatives ? afficher les tentatives ?)
+Meilleure gestion de l'affichage victoire/défaite 
 
-Editer API (pour les params (Difficulté et récupérer tous les surnoms)) + gestion du jeu
-
-revoir front keyboard & cie
+Faire un pop up de bienvenue
+Présentation du jeu des difficultés et des règles
+Choix de la difficulté
+Choix du top10, top100 ou du pseudo (+ vérification de l'existence)
+Bouton pour enregistrer et un pour annuler
+Roue des paramètres qui réouvre le POP UP de configuration

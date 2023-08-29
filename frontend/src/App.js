@@ -2,7 +2,6 @@ import './App.css';
 import Game from './components/Game/Game';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
-import Popup from './components/LoginPopup/LoginPopup';
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 
@@ -35,12 +34,6 @@ function App() {
         currentList={currentList}
       />
       <Footer />
-      <Popup
-        difficulty={difficulty}
-        currentList={currentList}
-        setDifficulty={setDifficulty}
-        setCurrentList={setCurrentList}
-      />
     </div>
   );
 }
