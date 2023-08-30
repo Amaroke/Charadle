@@ -73,6 +73,7 @@ function App() {
       <Game
         difficulty={difficulty}
         currentList={currentList}
+        showWelcomePopUp={showWelcomePopup}
       />
       <Footer />
     </div>

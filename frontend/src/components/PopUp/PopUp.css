@@ -9,25 +9,23 @@
     z-index: 999;
 }
 
-
 .popup {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: white;
+    background-color: #333;
     padding: 20px;
     border-radius: 5px;
     z-index: 1000;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     max-width: 80%;
+    color: white;
 }
-
 
 .popup-content {
-    text-align: left;
+    text-align: center;
 }
-
 
 .popup-close-button {
     background-color: #ff5733;
@@ -40,16 +38,21 @@
 }
 
 .popup-choice-button {
-    background-color: #ccc;
-    color: black;
+    background-color: #555;
+    color: white;
     border: none;
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
     margin-right: 10px;
+    width: 25%;
 }
 
 .popup-choice-button.active {
-    background-color: #ff5733;
+    background-color: #ff6c90;
     color: white;
+}
+
+h1 {
+    margin-bottom: 10%;
 }

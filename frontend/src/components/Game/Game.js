@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import characterImageLoading from '../../assets/images/characterImageLoading.gif';
 import './Game.css';
 
-const Game = ({ difficulty, currentList }) => {
+const Game = ({ difficulty, currentList, showWelcomePopUp }) => {
     const [animeName, setAnimeName] = useState("Loading...");
     const [characterImage, setCharacterImage] = useState(null);
     const [characterName, setCharacterName] = useState("Loading...");
@@ -110,10 +110,12 @@ const Game = ({ difficulty, currentList }) => {
         <div className="game-container">
             <div className="image-container">
                 {
-                    characterImage ?
+                    characterImage && !showWelcomePopUp ?
                         <img src={characterImage} className="characterImage" alt="character" />
-                        :
+                        : !showWelcomePopUp ?
                         <img src={characterImageLoading} className="characterImage characterImageLoading" alt="characterloading" />
+                        :
+                        null
                 }
             </div>
             <div className="content-container">

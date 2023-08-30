@@ -1,25 +1,13 @@
 import React from 'react';
 import logo from '../../assets/images/logo.png';
+import Cookies from 'js-cookie';
 import './Header.css';
 
-function Header({ difficulty, currentList, setDifficulty, setCurrentList }) {
+function Header() {
 
-    const handleDifficultyChange = (event) => {
-        setDifficulty(event.target.value);
+    const handleSettingsButtonClick = () => {
+        Cookies.set('visitedBefore', '', { expires: 365 });
         window.location.reload();
-    };
-
-    const handleCurrentListChange = (event) => {
-        if (event.target.value === 'newList') {
-            const pseudo = window.prompt('MAL account to use :');
-            if (pseudo !== null) {
-                setCurrentList(pseudo);
-                window.location.reload();
-            }
-        } else {
-            setCurrentList(event.target.value);
-            window.location.reload();
-        }
     };
 
     return (
@@ -30,35 +18,9 @@ function Header({ difficulty, currentList, setDifficulty, setCurrentList }) {
                         <img src={logo} className="logo" alt="logo" />
                         <span className="app-name">Charadle</span>
                     </li>
-                    <div className='parameters'>
-                        <li className="nav-item">
-                            <label className="label" htmlFor="difficultySelect">Difficulty :</label>
-                            <select
-                                id="difficultySelect"
-                                value={difficulty}
-                                onChange={handleDifficultyChange}
-                                className="select"
-                            >
-                                <option value="normal">Normal</option>
-                                <option value="expert">Expert</option>
-                            </select>
-                        </li>
-                        <label className="label-spacing"></label>
-                        <li className="nav-item">
-                            <label className="label" htmlFor="choiceSelect">Current list :</label>
-                            <select
-                                id="choiceSelect"
-                                value={currentList}
-                                onChange={handleCurrentListChange}
-                                className="select"
-                            >
-                                {currentList !== null && currentList !== "top10" && currentList !== "top100" ? <option value={currentList}>{currentList}</option> : null}
-                                <option value="top10">Top 10</option>
-                                <option value="top100">Top 100</option>
-                                <option value="newList">Use MAL Account</option>
-                            </select>
-                        </li>
-                    </div>
+                    <li className="nav-item">
+                        <div onClick={handleSettingsButtonClick} className="settings-button" />
+                    </li>
                 </ul>
             </nav>
         </header>
