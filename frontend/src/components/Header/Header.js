@@ -39,8 +39,7 @@ function Header({ difficulty, currentList, setDifficulty, setCurrentList }) {
                                 onChange={handleDifficultyChange}
                                 className="select"
                             >
-                                <option value="easy">Easy</option>
-                                <option value="advanced">Advanced</option>
+                                <option value="normal">Normal</option>
                                 <option value="expert">Expert</option>
                             </select>
                         </li>

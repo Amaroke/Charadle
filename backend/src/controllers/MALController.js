@@ -67,17 +67,14 @@ const getRandomCharacterInformations = async (anime, difficulty) => {
     const randomCharacters = await getRandomCharacters(anime);
     let characterId;
 
-    if (difficulty === 'easy') {
-      const randomCharacterData = randomCharacters.data[0];
+    if (difficulty === 'expert') {
+      const randomIndex = Math.floor(Math.random() * randomCharacters.data.length);
+      const randomCharacterData = randomCharacters.data[randomIndex];
       characterId = randomCharacterData.node.id;
-    } else if (difficulty === 'advanced') {
+    } else {
       const mainCharacters = randomCharacters.data.filter(character => character.role === 'Main');
       const randomIndex = Math.floor(Math.random() * mainCharacters.length);
       const randomCharacterData = mainCharacters[randomIndex];
-      characterId = randomCharacterData.node.id;
-    } else {
-      const randomIndex = Math.floor(Math.random() * randomCharacters.data.length);
-      const randomCharacterData = randomCharacters.data[randomIndex];
       characterId = randomCharacterData.node.id;
     }
 
