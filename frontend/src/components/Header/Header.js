@@ -7,6 +7,7 @@ function Header() {
 
     const handleSettingsButtonClick = () => {
         Cookies.set('visitedBefore', '', { expires: 365 });
+        Cookies.set('isGameStart', '', { expires: 365 });
         window.location.reload();
     };
 

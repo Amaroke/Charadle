@@ -1,8 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import characterImageLoading from '../../assets/images/characterImageLoading.gif';
 import './Game.css';
+import { useAppContext } from '../../AppContext';
+import CharacterInfo from './CharacterInfo/CharacterInfo';
+import KeyboardRow from './KeyboardRow/KeyboardRow';
+import KeyboardHints from './KeyboardHints/KeyboardHints';
 
-const Game = ({ difficulty, currentList, showWelcomePopUp }) => {
+const Game = () => {
+
+    const {
+        difficulty,
+        currentList,
+        isGameStart,
+    } = useAppContext();
+
     const [animeName, setAnimeName] = useState("Loading...");
     const [characterImage, setCharacterImage] = useState(null);
     const [characterName, setCharacterName] = useState("Loading...");
@@ -41,6 +52,32 @@ const Game = ({ difficulty, currentList, showWelcomePopUp }) => {
     const nextGame = () => {
         window.location.reload();
     };
+
+    const handleValidation = useCallback(() => {
+        const listInput = inputText.split(' ');
+        const characterAllNamesWithoutQuotes = characterAllNames.replace(/"/g, '').replace(/,/g, '');
+        const listCharacterName = characterAllNamesWithoutQuotes.split(' ');
+        listCharacterName.push(characterName);
+        let lowercaseListInput = listInput.map(motInput => motInput.toLowerCase());
+        lowercaseListInput = lowercaseListInput.filter(word => word.length >= 3);
+        const lowercaseFilteredListCharacterName = listCharacterName.map(characterName => characterName.toLowerCase());
+        if (lowercaseListInput.some(motInput => lowercaseFilteredListCharacterName.includes(motInput))) {
+            winGame();
+        } else {
+            setIsTentativeFailed(true);
+        }
+    }, [characterAllNames, characterName, inputText]);
+
+    useEffect(() => {
+        const handleKeyPress = (e) => {
+            if (e.key === "Enter" || e.key === "Return") {
+                console.log("Enter pressed");
+                handleValidation();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyPress);
+    }, [handleValidation]);
 
     useEffect(() => {
         function fetchRandomTopAnime() {
@@ -86,21 +123,11 @@ const Game = ({ difficulty, currentList, showWelcomePopUp }) => {
     }, [currentList, difficulty]);
 
     const handleKeyPress = (key) => {
+        console.log(key);
         if (key === "remove") {
             setInputText(prevText => prevText.slice(0, -1));
         } else if (key === "validate") {
-            const listInput = inputText.split(' ');
-            const characterAllNamesWithoutQuotes = characterAllNames.replace(/"/g, '').replace(/,/g, '');
-            const listCharacterName = characterAllNamesWithoutQuotes.split(' ');
-            listCharacterName.push(characterName);
-            let lowercaseListInput = listInput.map(motInput => motInput.toLowerCase());
-            lowercaseListInput = lowercaseListInput.filter(word => word.length >= 3);
-            const lowercaseFilteredListCharacterName = listCharacterName.map(characterName => characterName.toLowerCase());
-            if (lowercaseListInput.some(motInput => lowercaseFilteredListCharacterName.includes(motInput))) {
-                winGame();
-            } else {
-                setIsTentativeFailed(true);
-            }
+            handleValidation();
         } else {
             setInputText(prevText => prevText + key);
         }
@@ -110,30 +137,22 @@ const Game = ({ difficulty, currentList, showWelcomePopUp }) => {
         <div className="game-container">
             <div className="image-container">
                 {
-                    characterImage && !showWelcomePopUp ?
+                    characterImage && isGameStart ?
                         <img src={characterImage} className="characterImage" alt="character" />
-                        : !showWelcomePopUp ?
-                        <img src={characterImageLoading} className="characterImage characterImageLoading" alt="characterloading" />
-                        :
-                        null
+                        : isGameStart ?
+                            <img src={characterImageLoading} className="characterImage characterImageLoading" alt="characterloading" />
+                            :
+                            null
                 }
             </div>
             <div className="content-container">
-                <div className="character-info">
-                    <div className="characterNameContainer">
-                        {characterName.split(' ').map((word, index) => (
-                            <div className="characterName" key={index}>
-                                <span className={areInitialsVisible ? 'no-blur' : 'blur-text'}>
-                                    {word.charAt(0)}
-                                </span>
-                                <span className={isGameFinished ? 'no-blur' : 'blur-text'}>
-                                    {word.slice(1)}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                    <p className={isAnimeNameBlurred ? "animeNameP blur-text" : "animeNameP no-blur"}>{animeName}</p>
-                </div>
+                <CharacterInfo
+                    characterName={characterName}
+                    animeName={animeName}
+                    areInitialsVisible={areInitialsVisible}
+                    isAnimeNameBlurred={isAnimeNameBlurred}
+                    isGameFinished={isGameFinished}
+                />
                 <input
                     type="text"
                     placeholder="Guess the character name..."
@@ -141,42 +160,37 @@ const Game = ({ difficulty, currentList, showWelcomePopUp }) => {
                     onChange={e => setInputText(e.target.value)}
                     className="input-field"
                 />
-
                 <div className="keyboard">
-                    <div className="keyboard-row">
-                        {['A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'].map(letter => (
-                            <button key={letter} onClick={() => handleKeyPress(letter)}>{letter}</button>
-                        ))}
-                    </div>
-                    <div className="keyboard-row">
-                        {['Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M'].map(letter => (
-                            <button key={letter} onClick={() => handleKeyPress(letter)}>{letter}</button>
-                        ))}
-                    </div>
+                    <KeyboardRow letters={['A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']} handleKeyPress={handleKeyPress} />
+                    <KeyboardRow letters={['Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M']} handleKeyPress={handleKeyPress} />
+
                     <div className="keyboard-row">
                         <button className="button-large" key="enter" onClick={() => handleKeyPress("validate")}>
                             <span className="enter-button-icon"></span>
                         </button>
-
                         {['W', 'X', 'C', 'V', 'B', 'N'].map(letter => (
                             <button key={letter} onClick={() => handleKeyPress(letter)}>{letter}</button>
                         ))}
                         <button className="button-large" key={"remove"} onClick={() => handleKeyPress("remove")}><span className="remove-button-icon"></span></button>
+                    </div>
 
-                    </div>
-                    <div className="keyboard-hints">
-                        <button onClick={revealAnime} disabled={isAnimeNameBlurred ? false : true}>Reveal the Anime</button>
-                        <button onClick={revealInitials} disabled={areInitialsVisible ? true : false}>Show the initial(s)</button>
-                        <button onClick={revealAll} disabled={isGameFinished ? true : false}>Give up !</button>
-                        {isGameFinished ? <button className="give-another" onClick={nextGame}>Another game !</button> : <button className="give-another" key={"enter"} onClick={() => handleKeyPress("validate")}>{"Validate"}</button>}
-                    </div>
+                    <KeyboardHints
+                        revealAnime={revealAnime}
+                        revealInitials={revealInitials}
+                        revealAll={revealAll}
+                        isAnimeNameBlurred={isAnimeNameBlurred}
+                        areInitialsVisible={areInitialsVisible}
+                        isGameFinished={isGameFinished}
+                        nextGame={nextGame}
+                        handleKeyPress={handleKeyPress}
+                    />
                     <h1 className={isGameFinished ? isGameWon ? "won" : "failed" : ""}>
                         {isGameFinished ? isGameWon ? "You Won !" : "You Failed !" : isTentativeFailed ? "Try Again !" : " "}
                     </h1>
                 </div>
-
             </div>
-        </div >
+
+        </div>
     );
 };
 

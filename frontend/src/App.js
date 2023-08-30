@@ -1,17 +1,18 @@
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import './petal.css';
 import Game from './components/Game/Game';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
 import PopUp from './components/PopUp/PopUp';
-import React, { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
+import { useAppContext } from './AppContext';
 
 function App() {
-  const [difficulty, setDifficulty] = useState(Cookies.get('difficulty'));
-  const [currentList, setCurrentList] = useState(Cookies.get('currentList'));
   const [petals, setPetals] = useState([]);
-  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+
+  const {
+    showWelcomePopup,
+  } = useAppContext();
 
   useEffect(() => {
     const generatedPetals = [];
@@ -23,37 +24,11 @@ function App() {
       });
     }
     setPetals(generatedPetals);
-
-    const isFirstVisit = !Cookies.get('visitedBefore');
-
-    if (isFirstVisit) {
-      setShowWelcomePopup(true);
-
-      Cookies.set('visitedBefore', 'true', { expires: 365 });
-    }
   }, []);
-
-  useEffect(() => {
-    if (difficulty) {
-      Cookies.set('difficulty', difficulty, { expires: 365 });
-    }
-  }, [difficulty]);
-
-  useEffect(() => {
-    if (currentList) {
-      Cookies.set('currentList', currentList, { expires: 365 });
-    }
-  }, [currentList]);
 
   return (
     <div className="App">
-      {showWelcomePopup && <PopUp
-        difficulty={difficulty}
-        currentList={currentList}
-        setDifficulty={setDifficulty}
-        setCurrentList={setCurrentList}
-        setShowWelcomePopup={setShowWelcomePopup}
-      />}
+      {showWelcomePopup && <PopUp />}
       {petals.map((petal, index) => (
         <div
           className={"petal" + petal.type}
@@ -64,17 +39,8 @@ function App() {
           }}
         ></div>
       ))}
-      <Header
-        difficulty={difficulty}
-        currentList={currentList}
-        setDifficulty={setDifficulty}
-        setCurrentList={setCurrentList}
-      />
-      <Game
-        difficulty={difficulty}
-        currentList={currentList}
-        showWelcomePopUp={showWelcomePopup}
-      />
+      <Header />
+      <Game />
       <Footer />
     </div>
   );

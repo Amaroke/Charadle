@@ -1,0 +1,15 @@
+.popup-choice-button {
+    background-color: #555;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+    width: 25%;
+}
+
+.popup-choice-button.active {
+    background-color: #ff6c90;
+    color: white;
+}
