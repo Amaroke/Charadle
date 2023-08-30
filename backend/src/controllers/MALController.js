@@ -22,7 +22,7 @@ const getRandomUserAnime = async (username) => {
 
     const userAnimeList = response.data.data;
     const randomIndex = Math.floor(Math.random() * userAnimeList.length);
-    const animeID = topAnimeList[randomIndex].node.id;
+    const animeID = userAnimeList[randomIndex].node.id;
     const animeURL = `https://myanimelist.net/anime/${animeID}`;
     const axiosGet = await axios.get(animeURL);
     const $ = cheerio.load(axiosGet.data);
