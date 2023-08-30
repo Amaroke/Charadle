@@ -5,6 +5,7 @@ Charadle is a fun little website where you take a shot at guessing the anime cha
 ## Possible additions
 
 * Transform cookies in local storage.<br/>
+* Make a responsive version.<br/>
 * Check user existence.<br/>
 * Accept a margin of error in the entry.<br/>
 * Add more gamemodes (ex : "find the anime").<br/>
