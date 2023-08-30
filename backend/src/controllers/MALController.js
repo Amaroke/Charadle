@@ -114,11 +114,13 @@ const getCharacterInformations = async (characterId) => {
     const imageUrl = $('img.portrait-225x350').attr('data-src');
     const name = $('h2.normal_header').text();
     const allNames = $('h1.title-name').text();
+    const englishName = $('p.title-english').text();
 
     const characterInformations = {
       imageUrl: imageUrl,
       name: name,
-      allNames: allNames
+      allNames: allNames,
+      englishName: englishName
     };
 
     return characterInformations;

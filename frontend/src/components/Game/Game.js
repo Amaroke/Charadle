@@ -113,6 +113,7 @@ const Game = () => {
                     setCharacterImage(data.imageUrl);
                     setCharacterName(data.name.replace(/\([^)]*\)/g, ''));
                     setCharacterAllNames(data.allNames);
+                    setAnimeName(animeName + " (" + data.englishName + ")")
                 })
                 .catch(error => {
                     console.error(`Erreur : ${error.message}`);

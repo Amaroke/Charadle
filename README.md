@@ -1,6 +1,6 @@
 # Charadle
 
-Valider avec entrée
-Vvérification de l'existence du Pseudo
+Vérifier existence de l'utilisateur.
 Marge d'erreur acceptable ? 
-Nom anglais de l'animé
+
+Changement de jeu "trouver l'animé".
