@@ -50,9 +50,14 @@ const getRandomTopAnime = async (top) => {
 
     const topAnimeList = response.data.data;
     const randomIndex = Math.floor(Math.random() * topAnimeList.length);
+    const animeID = topAnimeList[randomIndex].node.id;
+    const animeURL = `https://myanimelist.net/anime/${animeID}`;
+    const axiosGet = await axios.get(animeURL);
+    const $ = cheerio.load(axiosGet.data);
+    const title = topAnimeList[randomIndex].node.title + $('p.english-title').text();
     const animeData = {
-      id: topAnimeList[randomIndex].node.id,
-      title: topAnimeList[randomIndex].node.title
+      id: animeID,
+      title: title
     };
     return animeData;
 
@@ -114,13 +119,11 @@ const getCharacterInformations = async (characterId) => {
     const imageUrl = $('img.portrait-225x350').attr('data-src');
     const name = $('h2.normal_header').text();
     const allNames = $('h1.title-name').text();
-    const englishName = $('p.title-english').text();
-
+    
     const characterInformations = {
       imageUrl: imageUrl,
       name: name,
-      allNames: allNames,
-      englishName: englishName
+      allNames: allNames
     };
 
     return characterInformations;
