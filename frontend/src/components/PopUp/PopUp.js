@@ -52,7 +52,7 @@ const PopUp = ({ difficulty, currentList, setDifficulty, setCurrentList, setShow
                                 placeholder="Input MAL pseudo"
                                 value={currentList === 'top100' || currentList === 'top10' ? '' : currentList}
                                 onChange={handlePseudoInputChange}
-                                className={"popup-choice-button" + (currentList === 'top100' || currentList === 'top10' ? "" : " active")}
+                                className={"popup-choice-button" + (currentList === 'top100' || currentList === 'top10' || currentList == null ? "" : " active")}
 
                             />
                         </div>
