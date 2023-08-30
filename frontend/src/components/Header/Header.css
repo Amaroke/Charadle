@@ -60,4 +60,5 @@
     outline: none !important;
     box-shadow: none !important;
     background-image: url('../../assets/images/params2.png');
+    cursor: pointer;
 }
