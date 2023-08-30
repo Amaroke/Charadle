@@ -29,9 +29,9 @@ const getRandomUserAnime = async (username) => {
     const englishName = $('p.title-english').text();
     let title;
     if (englishName != '') {
-      title = topAnimeList[randomIndex].node.title + ' - ' + englishName;
+      title = userAnimeList[randomIndex].node.title + ' - ' + englishName;
     } else {
-      title = topAnimeList[randomIndex].node.title;
+      title = userAnimeList[randomIndex].node.title;
     }
     const animeData = {
       id: animeID,
