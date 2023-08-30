@@ -1,6 +1,6 @@
-import "./PopUp.css";
+import "./popUp.css";
 import { useAppContext } from '../../AppContext';
-import ButtonChoice from "./ButtonChoice/ButtonChoice";
+import ButtonChoice from "./button_choice/ButtonChoice";
 import Cookies from "js-cookie";
 
 const PopUp = () => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import logo from '../../assets/images/logo.png';
 import Cookies from 'js-cookie';
-import './Header.css';
+import './header.css';
 
 function Header() {
 

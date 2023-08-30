@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
+import './app.css';
 import './petal.css';
-import Game from './components/Game/Game';
-import Header from './components/Header/Header';
-import Footer from './components/Footer/Footer';
-import PopUp from './components/PopUp/PopUp';
+import Game from './components/game/Game';
+import Header from './components/header/Header';
+import Footer from './components/footer/Footer';
+import PopUp from './components/pop_up/PopUp';
 import { useAppContext } from './AppContext';
 
 function App() {

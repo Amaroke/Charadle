@@ -1,5 +1,5 @@
 import React from 'react';
-import './ButtonChoice.css';
+import './buttonChoice.css';
 
 const ButtonChoice = ({ text, isActive, onClick }) => {
     return (

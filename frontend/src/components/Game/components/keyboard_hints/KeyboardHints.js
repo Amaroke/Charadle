@@ -1,4 +1,4 @@
-import "./KeyboardHints.css"
+import "./keyboardHints.css"
 
 const KeyboardHints = ({ revealAnime, revealInitials, revealAll, isAnimeNameBlurred, areInitialsVisible, isGameFinished, nextGame, handleKeyPress }) => {
     return (

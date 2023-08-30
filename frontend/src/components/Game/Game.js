@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import characterImageLoading from '../../assets/images/characterImageLoading.gif';
-import './Game.css';
+import './game.css';
 import { useAppContext } from '../../AppContext';
-import CharacterInfo from './CharacterInfo/CharacterInfo';
-import KeyboardRow from './KeyboardRow/KeyboardRow';
-import KeyboardHints from './KeyboardHints/KeyboardHints';
+import CharacterInfo from './components/character_info/CharacterInfo';
+import KeyboardRow from './components/keyboard_row/KeyboardRow';
+import KeyboardHints from './components/keyboard_hints/KeyboardHints';
 
 const Game = () => {
 
