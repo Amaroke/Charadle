@@ -165,7 +165,7 @@ const Game = () => {
                     <KeyboardRow letters={['Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M']} handleKeyPress={handleKeyPress} />
 
                     <div className="keyboard-row">
-                        <button className="button-large" key="enter" onClick={() => handleKeyPress("validate")}>
+                        <button className="button-large" key="enter" onClick={() => handleKeyPress(" ")}>
                             <span className="enter-button-icon"></span>
                         </button>
                         {['W', 'X', 'C', 'V', 'B', 'N'].map(letter => (
