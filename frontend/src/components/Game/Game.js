@@ -71,7 +71,6 @@ const Game = () => {
     useEffect(() => {
         const handleKeyPress = (e) => {
             if (e.key === "Enter" || e.key === "Return") {
-                console.log("Enter pressed");
                 handleValidation();
             }
         };
@@ -123,7 +122,6 @@ const Game = () => {
     }, [currentList, difficulty]);
 
     const handleKeyPress = (key) => {
-        console.log(key);
         if (key === "remove") {
             setInputText(prevText => prevText.slice(0, -1));
         } else if (key === "validate") {
