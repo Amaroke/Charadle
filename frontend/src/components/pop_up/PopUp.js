@@ -66,7 +66,7 @@ const PopUp = () => {
 
 
                     </div>
-                    <p>When everything is ready, you can hit 'Validate,' and don't worry, you'll be able to change these settings later!</p>
+                    <p>When everything is ready, you can hit 'Let's play !', and don't worry, you'll be able to change these settings later!</p>
                     <div>
                         <button
                             disabled={
