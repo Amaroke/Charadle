@@ -11,14 +11,14 @@
 
 .footer p {
   font-weight: 400;
-  font-size: 12px;
+  font-size: 16px;
   color: #fff;
   letter-spacing: 0.05em;
   margin-left: 2%;
 }
 
 .footer .copyright {
-  font-size: 12px;
+  font-size: 14px;
   color: #fff;
   text-align: center;
 }
@@ -26,4 +26,28 @@
 a {
   color: #feb9ce;
   text-decoration: none;
+}
+
+@media screen and (max-width: 768px) {
+  .footer {
+    padding: 1% 0;
+  }
+
+  .footer p {
+    font-size: 14px;
+  }
+
+  .footer .copyright {
+    font-size: 12px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .footer p {
+    font-size: 12px;
+  }
+
+  .footer .copyright {
+    font-size: 10px;
+  }
 }
