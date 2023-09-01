@@ -4,6 +4,8 @@ body {
     background-repeat: no-repeat;
     overflow-x: hidden;
     overflow-y: hidden;
+    max-height: 100vh;
+    
 }
 
 @media screen and (max-width: 1280px) {
@@ -11,5 +13,6 @@ body {
         background-image: none;
         background-color: #232428;
         overflow-x: hidden;
+        overflow-y: hidden;
     }
 }
