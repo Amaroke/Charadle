@@ -26,7 +26,7 @@ const PopUp = () => {
         <div className="blur-background">
             <div className="popup">
                 <div className="popup-content">
-                    <h1>🌸 Welcome to Charadle ! 🌸</h1>
+                    <h1>🌸 Welcome ! 🌸</h1>
                     <p>Charadle is a fun little website where you take a shot at guessing the anime character on the right. You've got endless tries!</p>
                     <p>There are two difficulty levels that affect the characters you'll be trying to guess. In 'Normal,' you'll encounter only the main characters, while in 'Expert,' every character is up for the challenge.</p>
                     <div>

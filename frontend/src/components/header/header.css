@@ -72,10 +72,6 @@
         display: flex;
     }
 
-    .nav-item {
-        margin-right: 1%;
-    }
-
     .app-name,
     .label,
     .label-spacing {
@@ -83,6 +79,7 @@
     }
 
     .settings-button {
+        right: 3%;
         width: 7%;
         padding-top: 7%;
     }
