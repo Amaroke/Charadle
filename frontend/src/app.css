@@ -2,11 +2,14 @@ body {
     background-image: url('./assets/images/background.png');
     background-size: cover;
     background-repeat: no-repeat;
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 @media screen and (max-width: 1280px) {
     body {
         background-image: none;
         background-color: #232428;
+        overflow-x: hidden;
     }
 }
