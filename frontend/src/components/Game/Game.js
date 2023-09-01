@@ -159,19 +159,20 @@ const Game = () => {
                     className="input-field"
                 />
                 <div className="keyboard">
-                    <KeyboardRow letters={['A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']} handleKeyPress={handleKeyPress} />
-                    <KeyboardRow letters={['Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M']} handleKeyPress={handleKeyPress} />
+                    <div className="keyboard-responsive">
+                        <KeyboardRow letters={['A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']} handleKeyPress={handleKeyPress} />
+                        <KeyboardRow letters={['Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M']} handleKeyPress={handleKeyPress} />
 
-                    <div className="keyboard-row">
-                        <button className="button-large" key="enter" onClick={() => handleKeyPress(" ")}>
-                            <span className="enter-button-icon"></span>
-                        </button>
-                        {['W', 'X', 'C', 'V', 'B', 'N'].map(letter => (
-                            <button key={letter} onClick={() => handleKeyPress(letter)}>{letter}</button>
-                        ))}
-                        <button className="button-large" key={"remove"} onClick={() => handleKeyPress("remove")}><span className="remove-button-icon"></span></button>
+                        <div className="keyboard-row">
+                            <button className="button-large" key="enter" onClick={() => handleKeyPress(" ")}>
+                                <span className="enter-button-icon"></span>
+                            </button>
+                            {['W', 'X', 'C', 'V', 'B', 'N'].map(letter => (
+                                <button key={letter} onClick={() => handleKeyPress(letter)}>{letter}</button>
+                            ))}
+                            <button className="button-large" key={"remove"} onClick={() => handleKeyPress("remove")}><span className="remove-button-icon"></span></button>
+                        </div>
                     </div>
-
                     <KeyboardHints
                         revealAnime={revealAnime}
                         revealInitials={revealInitials}

@@ -184,3 +184,45 @@ h1.won {
 h1.failed {
   color: red !important;
 }
+
+@media (max-width: 768px) {
+  .game-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-container {
+    width: 40%;
+  }
+
+  .keyboard-responsive {
+    display: none !important;
+  }
+
+  .keyboard {
+    margin-top: 0;
+  }
+
+  .give-another {
+    width: 50% !important;
+  }
+
+  .characterNameContainer {
+    font-size: 12px;
+  }
+
+  .characterName {
+    font-size: 12px;
+  }
+
+  .characterName span {
+    font-size: 12px;
+  }
+
+  .input-field {
+    padding: 10px;
+    margin-top: 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+}

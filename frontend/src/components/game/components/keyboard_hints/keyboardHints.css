@@ -15,3 +15,28 @@
     border: none;
     box-shadow: 5px 5px 5px 0 rgba(0, 0, 0, 0.5);
 }
+
+@media (max-width: 768px) {
+    .keyboard-hints {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .keyboard-hints button {
+        margin-top: 1%;
+        margin-left: 1%;
+        flex: 1;
+        height: 50px;
+        font-size: 10px;
+    }
+
+    .keyboard-hints button.give-another {
+        height: 30px !important;
+    }
+
+    .keyboard-hints button:nth-child(-n+3) {
+        flex: 0;
+    }
+}
