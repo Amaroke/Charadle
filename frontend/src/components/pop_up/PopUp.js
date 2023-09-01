@@ -1,7 +1,6 @@
 import "./popUp.css";
 import { useAppContext } from '../../AppContext';
 import ButtonChoice from "./button_choice/ButtonChoice";
-import Cookies from "js-cookie";
 
 const PopUp = () => {
 
@@ -19,7 +18,7 @@ const PopUp = () => {
 
     const handleValidateButtonClick = () => {
         setShowWelcomePopup(false);
-        Cookies.set('isGameStart', 'true', { expires: 365 });
+        localStorage.setItem('isGameStart', true);
         window.location.reload();
     };
 

@@ -1,55 +1,52 @@
-import React, { createContext, useContext, useState } from 'react';
-import { useEffect } from 'react';
-import Cookies from 'js-cookie';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AppContext = createContext();
 
 export const useAppContext = () => {
-    return useContext(AppContext);
+  return useContext(AppContext);
 };
 
 export const AppProvider = ({ children }) => {
-    const [difficulty, setDifficulty] = useState(Cookies.get('difficulty'));
-    const [currentList, setCurrentList] = useState(Cookies.get('currentList'));
-    const [showWelcomePopup, setShowWelcomePopup] = useState(false);
-    const [isGameStart, setIsGameStart] = useState(Cookies.get('isGameStart'));
+  const [difficulty, setDifficulty] = useState(localStorage.getItem('difficulty') || '');
+  const [currentList, setCurrentList] = useState(localStorage.getItem('currentList') || '');
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [isGameStart, setIsGameStart] = useState(localStorage.getItem('isGameStart') || '');
 
-    useEffect(() => {
-        const isFirstVisit = !Cookies.get('visitedBefore');
+  useEffect(() => {
+    const isFirstVisit = !localStorage.getItem('visitedBefore');
 
-        if (isFirstVisit) {
-            setShowWelcomePopup(true);
-            Cookies.set('visitedBefore', 'true', { expires: 365 });
-        }
+    if (isFirstVisit) {
+      setShowWelcomePopup(true);
+      localStorage.setItem('visitedBefore', 'true');
+    }
 
-        if (difficulty) {
-            Cookies.set('difficulty', difficulty, { expires: 365 });
-        }
+    if (difficulty) {
+      localStorage.setItem('difficulty', difficulty);
+    }
 
-        if (currentList) {
-            Cookies.set('currentList', currentList, { expires: 365 });
-        }
+    if (currentList) {
+      localStorage.setItem('currentList', currentList);
+    }
 
-        if (isGameStart) {
-            Cookies.set('isGameStart', isGameStart, { expires: 365 });
-        }
+    if (isGameStart) {
+      localStorage.setItem('isGameStart', isGameStart);
+    }
+  }, [difficulty, currentList, isGameStart]);
 
-    }, [difficulty, currentList, isGameStart]);
-
-    return (
-        <AppContext.Provider
-            value={{
-                difficulty,
-                setDifficulty,
-                currentList,
-                isGameStart,
-                setCurrentList,
-                showWelcomePopup,
-                setShowWelcomePopup,
-                setIsGameStart,
-            }}
-        >
-            {children}
-        </AppContext.Provider>
-    );
+  return (
+    <AppContext.Provider
+      value={{
+        difficulty,
+        setDifficulty,
+        currentList,
+        isGameStart,
+        setCurrentList,
+        showWelcomePopup,
+        setShowWelcomePopup,
+        setIsGameStart,
+      }}
+    >
+      {children}
+    </AppContext.Provider>
+  );
 };
