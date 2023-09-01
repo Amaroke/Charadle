@@ -41,10 +41,9 @@
 }
 
 .settings-button {
-    height: 5%;
     width: 3%;
+    padding-top: 3%;
     margin-left: auto;
-    align-self: center;
     position: absolute;
     right: 1%;
     background-image: url('../../assets/images/params.png');
@@ -61,4 +60,30 @@
     box-shadow: none !important;
     background-image: url('../../assets/images/params2.png');
     cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+    .logo {
+        width: 14%;
+        margin-left: 2%;
+    }
+
+    .nav-list {
+        display: flex;
+    }
+
+    .nav-item {
+        margin-right: 1%;
+    }
+
+    .app-name,
+    .label,
+    .label-spacing {
+        display: none;
+    }
+
+    .settings-button {
+        width: 7%;
+        padding-top: 7%;
+    }
 }
