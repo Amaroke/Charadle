@@ -26,6 +26,10 @@
     text-align: center;
 }
 
+.popup-choice-button::placeholder {
+    color: white;
+}
+
 .popup-close-button {
     background-color: #ff5733;
     color: white;

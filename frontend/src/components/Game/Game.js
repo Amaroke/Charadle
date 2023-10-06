@@ -88,34 +88,36 @@ const Game = () => {
             } else {
                 apiURL = "https://charadle.vercel.app/randomUserAnime/" + currentList;
             }
-            fetch(apiURL)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Erreur de requête : ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const animeID = data.id;
-                    setAnimeName(data.title);
+            if ("https://charadle.vercel.app/randomUserAnime/" != apiURL) {
+                fetch(apiURL)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Erreur de requête : ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const animeID = data.id;
+                        setAnimeName(data.title);
 
-                    const nouvelleURL = `https://charadle.vercel.app/randomCharacterInformations/${animeID}/${difficulty}`;
-                    return fetch(nouvelleURL);
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Erreur de requête : ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    setCharacterImage(data.imageUrl);
-                    setCharacterName(data.name.replace(/\([^)]*\)/g, ''));
-                    setCharacterAllNames(data.allNames);
-                })
-                .catch(error => {
-                    console.error(`Erreur : ${error.message}`);
-                });
+                        const nouvelleURL = `https://charadle.vercel.app/randomCharacterInformations/${animeID}/${difficulty}`;
+                        return fetch(nouvelleURL);
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Erreur de requête : ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        setCharacterImage(data.imageUrl);
+                        setCharacterName(data.name.replace(/\([^)]*\)/g, ''));
+                        setCharacterAllNames(data.allNames);
+                    })
+                    .catch(error => {
+                        console.error(`Erreur : ${error.message}`);
+                    });
+            }
         }
 
         fetchRandomTopAnime();
@@ -164,13 +166,13 @@ const Game = () => {
                         <KeyboardRow letters={['Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M']} handleKeyPress={handleKeyPress} />
 
                         <div className="keyboard-row">
-                            <button className="button-large" key="enter" onClick={() => handleKeyPress(" ")}>
+                            <button title="enter" aria-label="enter" className="button-large" key="enter" onClick={() => handleKeyPress(" ")}>
                                 <span className="enter-button-icon"></span>
                             </button>
                             {['W', 'X', 'C', 'V', 'B', 'N'].map(letter => (
                                 <button key={letter} onClick={() => handleKeyPress(letter)}>{letter}</button>
                             ))}
-                            <button className="button-large" key={"remove"} onClick={() => handleKeyPress("remove")}><span className="remove-button-icon"></span></button>
+                            <button title="remove" aria-label="remove" className="button-large" key={"remove"} onClick={() => handleKeyPress("remove")}><span className="remove-button-icon"></span></button>
                         </div>
                     </div>
                     <KeyboardHints
