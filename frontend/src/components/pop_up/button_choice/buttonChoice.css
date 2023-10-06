@@ -10,14 +10,14 @@
 }
 
 .popup-choice-button.active {
-    background-color: #ff6c90;
+    background-color: #ff4775;
     color: white;
 }
 
 @media screen and (max-width: 768px) {
     .popup-choice-button {
         width: 40%;
-        font-size: 10px;
+        font-size: 12px;
         margin-top: 1%;
     }
 }

@@ -15,7 +15,7 @@ function Header() {
             <nav>
                 <ul className="nav-list">
                     <li className="nav-item">
-                        <img src={logo} className="logo" alt="logo" />
+                        <img src={logo} className="logo" alt="logo" width={30} height={30} />
                         <span className="app-name">Charadle</span>
                     </li>
                     <li className="nav-item">

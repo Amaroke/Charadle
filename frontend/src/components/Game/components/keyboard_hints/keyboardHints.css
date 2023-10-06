@@ -28,8 +28,8 @@
         margin-top: 1%;
         margin-left: 1%;
         flex: 1;
-        height: 50px;
-        font-size: 10px;
+        height: 60px;
+        font-size: 12px;
     }
 
     .keyboard-hints button.give-another {
