@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/Charadle/static/css/main.e01c5d44.css",
-    "main.js": "/Charadle/static/js/main.32b7361e.js",
+    "main.css": "/Charadle/static/css/main.47ce9752.css",
+    "main.js": "/Charadle/static/js/main.27f4f429.js",
     "static/media/background.png": "/Charadle/static/media/background.1abed91f8ddfc034b1a4.png",
     "static/media/characterImageLoading.gif": "/Charadle/static/media/characterImageLoading.312d9464427f741748fd.gif",
     "static/media/logo.png": "/Charadle/static/media/logo.b0e3563066f01d2929a6.png",
     "index.html": "/Charadle/index.html",
-    "main.e01c5d44.css.map": "/Charadle/static/css/main.e01c5d44.css.map",
-    "main.32b7361e.js.map": "/Charadle/static/js/main.32b7361e.js.map"
+    "main.47ce9752.css.map": "/Charadle/static/css/main.47ce9752.css.map",
+    "main.27f4f429.js.map": "/Charadle/static/js/main.27f4f429.js.map"
   },
   "entrypoints": [
-    "static/css/main.e01c5d44.css",
-    "static/js/main.32b7361e.js"
+    "static/css/main.47ce9752.css",
+    "static/js/main.27f4f429.js"
   ]
 }
