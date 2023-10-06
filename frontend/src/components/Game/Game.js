@@ -88,7 +88,7 @@ const Game = () => {
             } else {
                 apiURL = "https://charadle.vercel.app/randomUserAnime/" + currentList;
             }
-            if ("https://charadle.vercel.app/randomUserAnime/" != apiURL) {
+            if ("https://charadle.vercel.app/randomUserAnime/" !== apiURL) {
                 fetch(apiURL)
                     .then(response => {
                         if (!response.ok) {
