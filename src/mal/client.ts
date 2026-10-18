@@ -1,9 +1,18 @@
-import type { Anime, AnimeSource, Character } from "@/game/draw";
+import { PoolError, type Anime, type AnimeSource, type Character, type ListedAnime } from "@/game/draw";
+import { isWatchStatus } from "@/game/settings";
 
 const officialApi = "https://api.myanimelist.net/v2";
 
 type RankingResponse = {
   data: { node: { id: number; title: string; alternative_titles?: { en?: string } } }[];
+};
+
+type AnimeListResponse = {
+  data: {
+    node: { id: number; title: string; alternative_titles?: { en?: string } };
+    list_status?: { status?: string; score?: number };
+  }[];
+  paging?: { next?: string };
 };
 
 type CharactersResponse = {
@@ -19,6 +28,20 @@ type CharactersResponse = {
   }[];
 };
 
+const listPageSize = 1000;
+const maxListPages = 20;
+
+class MalHttpError extends Error {
+  constructor(
+    path: string,
+    readonly status: number,
+  ) {
+    super(`MAL API ${path} answered ${status}`);
+  }
+}
+
+const listProblems: Partial<Record<number, PoolError["problem"]>> = { 403: "private-list", 404: "unknown-user" };
+
 export function malClient({
   clientId,
   baseUrl = officialApi,
@@ -30,7 +53,7 @@ export function malClient({
     const url = new URL(`${baseUrl}${path}`);
     url.search = new URLSearchParams(params).toString();
     const response = await fetch(url, { headers: { "X-MAL-CLIENT-ID": clientId } });
-    if (!response.ok) throw new Error(`MAL API ${path} answered ${response.status}`);
+    if (!response.ok) throw new MalHttpError(path, response.status);
     return response.json() as Promise<T>;
   }
 
@@ -46,6 +69,32 @@ export function malClient({
         title: node.title,
         englishTitle: node.alternative_titles?.en,
       }));
+    },
+
+    async malList(username): Promise<ListedAnime[]> {
+      const listed: ListedAnime[] = [];
+      for (let page = 0; page < maxListPages; page++) {
+        const list = await get<AnimeListResponse>(`/users/${encodeURIComponent(username)}/animelist`, {
+          fields: "list_status,alternative_titles",
+          limit: String(listPageSize),
+          offset: String(page * listPageSize),
+        }).catch((error: unknown) => {
+          const problem = error instanceof MalHttpError ? listProblems[error.status] : undefined;
+          throw problem ? new PoolError(problem) : error;
+        });
+        for (const { node, list_status } of list.data) {
+          if (!isWatchStatus(list_status?.status)) continue;
+          listed.push({
+            id: node.id,
+            title: node.title,
+            englishTitle: node.alternative_titles?.en,
+            status: list_status.status,
+            score: list_status.score ?? 0,
+          });
+        }
+        if (!list.paging?.next) break;
+      }
+      return listed;
     },
 
     async characters(animeId): Promise<Character[]> {

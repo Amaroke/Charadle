@@ -1,7 +1,20 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { difficulties, tiers, type Difficulty, type Settings, type Tier } from "@/game/settings";
+import {
+  defaultMalList,
+  difficulties,
+  isMalList,
+  isUsername,
+  maxScore,
+  tiers,
+  watchStatuses,
+  type Difficulty,
+  type MalListPool,
+  type Settings,
+  type Tier,
+  type WatchStatus,
+} from "@/game/settings";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 type FreePlaySettingsProps = {
@@ -15,13 +28,28 @@ type FreePlaySettingsProps = {
 const optionClass =
   "cursor-pointer rounded border border-mist/40 px-3 py-2 text-center has-checked:border-sakura has-checked:bg-sakura has-checked:font-bold has-checked:text-ink has-focus-visible:outline-2 has-focus-visible:outline-blossom";
 
+const scores = Array.from({ length: maxScore + 1 }, (_, score) => score);
+
 export function FreePlaySettings({ labels, settings, pending, onPlay, onCancel }: FreePlaySettingsProps) {
-  const [pool, setPool] = useState<Tier>(settings.pool);
+  const [pool, setPool] = useState<Tier | "mal">(isMalList(settings.pool) ? "mal" : settings.pool);
+  const [malList, setMalList] = useState<MalListPool>(isMalList(settings.pool) ? settings.pool : defaultMalList);
   const [difficulty, setDifficulty] = useState<Difficulty>(settings.difficulty);
+  const username = malList.username.trim();
+  const playable = pool !== "mal" || (isUsername(username) && malList.statuses.length > 0);
+
+  function toggleStatus(status: WatchStatus) {
+    setMalList((current) => ({
+      ...current,
+      statuses: current.statuses.includes(status)
+        ? current.statuses.filter((kept) => kept !== status)
+        : watchStatuses.filter((kept) => kept === status || current.statuses.includes(kept)),
+    }));
+  }
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    onPlay({ pool, difficulty });
+    if (!playable) return;
+    onPlay({ pool: pool === "mal" ? { ...malList, username } : pool, difficulty });
   }
 
   return (
@@ -44,8 +72,67 @@ export function FreePlaySettings({ labels, settings, pending, onPlay, onCancel }
               Top {tier}
             </label>
           ))}
+          <label className={optionClass}>
+            <input
+              type="radio"
+              name="pool"
+              value="mal"
+              checked={pool === "mal"}
+              onChange={() => setPool("mal")}
+              className="sr-only"
+            />
+            {labels.malList}
+          </label>
         </div>
       </fieldset>
+      {pool === "mal" && (
+        <fieldset className="flex flex-col gap-4">
+          <legend className="mb-2 font-bold">{labels.malList}</legend>
+          <p className="text-sm text-mist">{labels.malListHint}</p>
+          <label className="flex flex-col gap-1">
+            <span className="text-sm">{labels.username}</span>
+            <input
+              value={malList.username}
+              onChange={(event) => setMalList((current) => ({ ...current, username: event.target.value }))}
+              autoComplete="off"
+              required
+              className="rounded border border-mist/40 bg-ink px-3 py-2 focus:border-sakura focus:outline-none"
+            />
+          </label>
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-2 text-sm">{labels.statuses}</legend>
+            <div className="grid grid-cols-2 gap-2">
+              {watchStatuses.map((status) => (
+                <label key={status} className={optionClass}>
+                  <input
+                    type="checkbox"
+                    name="status"
+                    value={status}
+                    checked={malList.statuses.includes(status)}
+                    onChange={() => toggleStatus(status)}
+                    className="sr-only"
+                  />
+                  {labels[status]}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <label className="flex items-center justify-between gap-2">
+            <span className="text-sm">{labels.minScore}</span>
+            <select
+              value={malList.minScore}
+              onChange={(event) => setMalList((current) => ({ ...current, minScore: Number(event.target.value) }))}
+              className="rounded border border-mist/40 bg-ink px-3 py-2 focus:border-sakura focus:outline-none"
+            >
+              {scores.map((score) => (
+                <option key={score} value={score}>
+                  {score === 0 ? labels.anyScore : score}
+                </option>
+              ))}
+            </select>
+          </label>
+        </fieldset>
+      )}
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 font-bold">{labels.difficulty}</legend>
         <div className="grid grid-cols-2 gap-2">
@@ -71,7 +158,7 @@ export function FreePlaySettings({ labels, settings, pending, onPlay, onCancel }
             {labels.cancel}
           </button>
         )}
-        <button type="submit" disabled={pending} aria-busy={pending} className="rounded bg-sakura px-6 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
+        <button type="submit" disabled={pending || !playable} aria-busy={pending} className="rounded bg-sakura px-6 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
           {pending ? labels.loading : labels.play}
         </button>
       </div>
