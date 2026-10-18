@@ -1,6 +1,13 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+
+const settingsCookie = { name: "FREE_PLAY_SETTINGS", value: "pool=100&difficulty=normal", url: "http://localhost:3100" };
+
+async function rememberSettings(context: BrowserContext) {
+  await context.addCookies([settingsCookie]);
+}
 
 async function startFreePlay(page: Page) {
+  await rememberSettings(page.context());
   const responses: string[] = [];
   page.on("response", async (response) => {
     if (response.request().method() === "POST") responses.push(await response.text().catch(() => ""));
@@ -66,6 +73,7 @@ test("each hint is used once and the hints are disabled once the game is over", 
 });
 
 test("free play speaks French on the French route", async ({ page }) => {
+  await rememberSettings(page.context());
   await page.goto("/fr/play");
   await expect(page.getByRole("img", { name: "Personnage à deviner" })).toBeVisible();
   await page.getByRole("button", { name: "Abandonner" }).click();
@@ -73,6 +81,7 @@ test("free play speaks French on the French route", async ({ page }) => {
 });
 
 test("the anime title is shown in French on the French route", async ({ page }) => {
+  await rememberSettings(page.context());
   await page.goto("/fr/play");
   await page.getByRole("button", { name: "Abandonner" }).click();
   await expect(page.getByText("One Piece (VF)")).toBeVisible();
@@ -82,7 +91,8 @@ test("the anime title is shown in French on the French route", async ({ page }) 
 });
 
 test("the first character is drawn by the server", async ({ request }) => {
-  const html = await (await request.get("/en/play")).text();
+  const cookie = `${settingsCookie.name}=${settingsCookie.value}`;
+  const html = await (await request.get("/en/play", { headers: { cookie } })).text();
   expect(html.match(/alt="Character to guess"/g)).toHaveLength(1);
   expect(html).not.toMatch(/luffy|monkey/i);
 });
@@ -112,4 +122,48 @@ test("hints are stacked one above the other", async ({ page }) => {
   const anime = await page.getByRole("button", { name: "Reveal the anime" }).boundingBox();
   const initials = await page.getByRole("button", { name: "Reveal the initials" }).boundingBox();
   expect(initials!.y).toBeGreaterThanOrEqual(anime!.y + anime!.height);
+});
+
+test("a first visitor chooses the settings before playing", async ({ page }) => {
+  const draws: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().includes("/api/puzzle")) draws.push(request.url());
+  });
+  await page.goto("/en");
+  await page.getByRole("link", { name: "Free play" }).click();
+  await expect(page.getByRole("form", { name: "Settings" })).toBeVisible();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeHidden();
+  for (const tier of [5, 10, 20, 50, 100, 200, 500]) {
+    await expect(page.getByRole("radio", { name: `Top ${tier}`, exact: true })).toBeVisible();
+  }
+
+  await page.getByText("Top 500", { exact: true }).click();
+  await page.getByText("Expert", { exact: true }).click();
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeVisible();
+  expect(draws[0]).toContain("pool=500&difficulty=expert");
+});
+
+test("the settings are remembered after a reload", async ({ page }) => {
+  await page.goto("/en/play");
+  await page.getByText("Top 20", { exact: true }).click();
+  await page.getByText("Expert", { exact: true }).click();
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeVisible();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByRole("radio", { name: "Top 20", exact: true })).toBeChecked();
+  await expect(page.getByRole("radio", { name: /^Expert/ })).toBeChecked();
+});
+
+test("the settings can be opened during a game and left without losing it", async ({ page }) => {
+  await startFreePlay(page);
+  await page.getByRole("button", { name: "Reveal the initials" }).click();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByRole("radio", { name: "Top 100", exact: true })).toBeChecked();
+  await expect(page.getByRole("radio", { name: /^Normal/ })).toBeChecked();
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByText("L. M. D.")).toBeVisible();
 });
