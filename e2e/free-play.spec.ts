@@ -1,6 +1,10 @@
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 
-const settingsCookie = { name: "FREE_PLAY_SETTINGS", value: "pool=100&difficulty=normal", url: "http://localhost:3100" };
+const settingsCookie = {
+  name: "FREE_PLAY_SETTINGS",
+  value: "pool=mal&user=luffyfan&status=completed&score=0&difficulty=normal",
+  url: "http://localhost:3100",
+};
 
 async function rememberSettings(context: BrowserContext) {
   await context.addCookies([settingsCookie]);
@@ -94,7 +98,7 @@ test("the first character is drawn by the server", async ({ request }) => {
   const cookie = `${settingsCookie.name}=${settingsCookie.value}`;
   const html = await (await request.get("/en/play", { headers: { cookie } })).text();
   expect(html.match(/alt="Character to guess"/g)).toHaveLength(1);
-  expect(html).not.toMatch(/luffy|monkey/i);
+  expect(html.replaceAll("luffyfan", "")).not.toMatch(/luffy|monkey/i);
 });
 
 test("the next character is drawn before it is asked for", async ({ page }) => {
@@ -162,7 +166,7 @@ test("the settings can be opened during a game and left without losing it", asyn
   await startFreePlay(page);
   await page.getByRole("button", { name: "Reveal the initials" }).click();
   await page.getByRole("button", { name: "Settings" }).click();
-  await expect(page.getByRole("radio", { name: "Top 100", exact: true })).toBeChecked();
+  await expect(page.getByRole("radio", { name: "MAL list" })).toBeChecked();
   await expect(page.getByRole("radio", { name: /^Normal/ })).toBeChecked();
   await page.getByRole("button", { name: "Cancel" }).click();
   await expect(page.getByText("L. M. D.")).toBeVisible();

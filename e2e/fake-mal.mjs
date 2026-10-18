@@ -5,12 +5,24 @@ const port = Number(process.env.FAKE_MAL_PORT ?? 3101);
 const origin = `http://localhost:${port}`;
 const picture = readFileSync(new URL("../public/images/logo.png", import.meta.url));
 
+const dailyCasts = [
+  { anime: { id: 20, title: "Naruto" }, character: { id: 17, first_name: "Naruto", last_name: "Uzumaki" } },
+  { anime: { id: 5114, title: "Hagane no Renkinjutsushi" }, character: { id: 11, first_name: "Edward", last_name: "Elric" } },
+  { anime: { id: 1535, title: "Death Note" }, character: { id: 80, first_name: "Light", last_name: "Yagami" } },
+  { anime: { id: 16498, title: "Shingeki no Kyojin" }, character: { id: 40882, first_name: "Eren", last_name: "Yeager" } },
+  { anime: { id: 813, title: "Dragon Ball Z" }, character: { id: 246, first_name: "Goku", last_name: "Son" } },
+  { anime: { id: 38000, title: "Kimetsu no Yaiba" }, character: { id: 146156, first_name: "Tanjiro", last_name: "Kamado" } },
+];
+
 const ranking = {
-  data: [{ node: { id: 21, title: "Wan Pīsu", alternative_titles: { en: "One Piece" } } }],
+  data: [
+    { node: { id: 21, title: "Wan Pīsu", alternative_titles: { en: "One Piece" } } },
+    ...dailyCasts.map(({ anime }) => ({ node: { ...anime, alternative_titles: {} } })),
+  ],
 };
 
-const characters = {
-  data: [
+const casts = {
+  21: [
     {
       node: {
         id: 40,
@@ -28,6 +40,12 @@ const characters = {
     { node: { id: 62, first_name: "Zoro", last_name: "Roronoa" }, role: "Supporting" },
     { node: { id: 305, first_name: "Sanji", last_name: "" }, role: "Supporting" },
   ],
+  ...Object.fromEntries(
+    dailyCasts.map(({ anime, character }) => [
+      anime.id,
+      [{ node: { ...character, main_picture: { medium: `${origin}/characters/${character.id}.png` } }, role: "Main" }],
+    ]),
+  ),
 };
 
 const animeLists = {
@@ -65,7 +83,8 @@ createServer((request, response) => {
     return response.end();
   }
   if (pathname === "/v2/anime/ranking") return json(response, ranking);
-  if (pathname === "/v2/anime/21/characters") return json(response, characters);
+  const animeId = pathname.match(/^\/v2\/anime\/(\d+)\/characters$/)?.[1];
+  if (casts[animeId]) return json(response, { data: casts[animeId] });
   const listOwner = pathname.match(/^\/v2\/users\/([^/]+)\/animelist$/)?.[1]?.toLowerCase();
   if (listOwner === "secretive") {
     response.writeHead(403, { "content-type": "application/json" });

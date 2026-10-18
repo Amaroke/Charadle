@@ -1,13 +1,11 @@
 "use server";
 
-import { isCorrectGuess } from "@/game/guess";
+import { isCorrectGuess, maxGuessLength } from "@/game/guess";
 import { openPuzzle, type Reveal } from "@/game/puzzle";
 
 export type GuessResult = { correct: false } | { correct: true; reveal: Reveal };
 
 export type ChoiceResult = { correct: boolean; reveal: Reveal };
-
-const maxGuessLength = 100;
 
 export async function submitGuess(ticket: string, guess: string): Promise<GuessResult> {
   const puzzle = openPuzzle(ticket);

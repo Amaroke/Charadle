@@ -4,6 +4,12 @@ const algorithm = "aes-256-gcm";
 const ivLength = 12;
 const tagLength = 16;
 
+export function gameSecret(): string {
+  const value = process.env.GAME_SECRET;
+  if (!value) throw new Error("GAME_SECRET is not set");
+  return value;
+}
+
 function keyOf(secret: string): Buffer {
   return createHash("sha256").update(`charadle-ticket:${secret}`).digest();
 }

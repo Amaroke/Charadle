@@ -13,6 +13,8 @@ function normalize(name: string): string {
     .trim();
 }
 
+export const maxGuessLength = 100;
+
 const typoMinLength = 5;
 
 function distance(a: string, b: string): number {

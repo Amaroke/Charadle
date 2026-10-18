@@ -32,6 +32,8 @@ export default defineConfig({
         MAL_CLIENT_ID: "e2e-client-id",
         WIKIDATA_URL: `http://localhost:${fakeMalPort}/sparql`,
         GAME_SECRET: "e2e-game-secret",
+        DATABASE_URL: "memory:",
+        CRON_SECRET: "e2e-cron-secret",
       },
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,

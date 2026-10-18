@@ -25,12 +25,20 @@ export default async function Home() {
         <p className="max-w-sm text-base text-mist sm:max-w-md sm:text-lg">
           {dict.home.tagline}
         </p>
-        <Link
-          href={`/${locale}/play`}
-          className="relative rounded bg-sakura px-6 py-3 text-lg font-bold text-ink hover:bg-blossom"
-        >
-          {dict.home.play}
-        </Link>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Link
+            href={`/${locale}/daily`}
+            className="relative rounded bg-sakura px-6 py-3 text-lg font-bold text-ink hover:bg-blossom"
+          >
+            {dict.home.daily}
+          </Link>
+          <Link
+            href={`/${locale}/play`}
+            className="relative rounded border border-sakura px-6 py-3 text-lg font-bold text-sakura hover:bg-sakura hover:text-ink"
+          >
+            {dict.home.play}
+          </Link>
+        </div>
       </main>
     </>
   );
