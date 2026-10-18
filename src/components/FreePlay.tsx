@@ -5,19 +5,30 @@ import { useEffect, useRef, useState, useTransition, type FormEvent } from "reac
 import { giveUp, submitGuess } from "@/game/actions";
 import type { HintKind } from "@/game/hint";
 import type { Puzzle, Reveal } from "@/game/puzzle";
+import { defaultSettings, settingsCookie, settingsParams, type Settings } from "@/game/settings";
 import type { Dictionary } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
+import { FreePlaySettings } from "@/components/FreePlaySettings";
 
 type FreePlayProps = {
   labels: Dictionary["freePlay"];
   locale: Locale;
+  initialSettings?: Settings;
   initialPuzzle?: Puzzle;
 };
 
-type State =
-  | { status: "error" }
+type Game =
+  | { status: "error"; attempted: Settings }
   | { status: "playing"; puzzle: Puzzle; feedback?: "wrong" | "failed" }
   | { status: "over"; puzzle: Puzzle; won: boolean; reveal: Reveal };
+
+type State = Game | { status: "settings"; previous?: Game };
+
+const oneYear = 60 * 60 * 24 * 365;
+
+function remember(settings: Settings) {
+  document.cookie = `${settingsCookie}=${settingsParams(settings)}; max-age=${oneYear}; path=/; samesite=lax`;
+}
 
 function preloadPicture(src: string): Promise<void> {
   return new Promise((resolve) => {
@@ -28,53 +39,96 @@ function preloadPicture(src: string): Promise<void> {
   });
 }
 
-async function drawWithPicture(locale: Locale): Promise<Puzzle> {
-  const response = await fetch(`/api/puzzle?${new URLSearchParams({ locale })}`, { cache: "no-store" });
+async function drawWithPicture(locale: Locale, settings: Settings): Promise<Puzzle> {
+  const params = settingsParams(settings);
+  params.set("locale", locale);
+  const response = await fetch(`/api/puzzle?${params}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Puzzle draw answered ${response.status}`);
   const puzzle = (await response.json()) as Puzzle;
   await preloadPicture(puzzle.picture);
   return puzzle;
 }
 
-export function FreePlay({ labels, locale, initialPuzzle }: FreePlayProps) {
-  const [state, setState] = useState<State>(
-    initialPuzzle ? { status: "playing", puzzle: initialPuzzle } : { status: "error" },
-  );
+function sameSettings(a: Settings, b: Settings): boolean {
+  return settingsParams(a).toString() === settingsParams(b).toString();
+}
+
+function initialState(settings?: Settings, puzzle?: Puzzle): State {
+  if (!settings) return { status: "settings" };
+  return puzzle ? { status: "playing", puzzle } : { status: "error", attempted: settings };
+}
+
+export function FreePlay({ labels, locale, initialSettings, initialPuzzle }: FreePlayProps) {
+  const [state, setState] = useState<State>(() => initialState(initialSettings, initialPuzzle));
+  const [settings, setSettings] = useState<Settings | undefined>(initialSettings);
   const [guess, setGuess] = useState("");
   const [usedHints, setUsedHints] = useState<HintKind[]>([]);
   const [pending, startTransition] = useTransition();
-  const upcoming = useRef<Promise<Puzzle> | null>(null);
-  const ticket = state.status === "error" ? undefined : state.puzzle.ticket;
+  const upcoming = useRef<{ settings: Settings; draw: Promise<Puzzle> } | null>(null);
+  const game = state.status === "settings" ? state.previous : state;
+  const ticket = game && game.status !== "error" ? game.puzzle.ticket : undefined;
 
   useEffect(() => {
-    if (!ticket) return;
-    const draw = drawWithPicture(locale);
+    if (!ticket || !settings) return;
+    const draw = drawWithPicture(locale, settings);
     draw.catch(() => {});
-    upcoming.current = draw;
-  }, [ticket, locale]);
+    upcoming.current = { settings, draw };
+  }, [ticket, locale, settings]);
 
-  function next() {
-    const draw = upcoming.current ?? drawWithPicture(locale);
+  function play(chosen: Settings) {
+    const preloaded = upcoming.current && sameSettings(upcoming.current.settings, chosen) ? upcoming.current : null;
+    const draw = preloaded?.draw ?? drawWithPicture(locale, chosen);
     upcoming.current = null;
     startTransition(async () => {
       try {
         const puzzle = await draw;
         setGuess("");
         setUsedHints([]);
+        remember(chosen);
+        setSettings(chosen);
         setState({ status: "playing", puzzle });
       } catch {
-        setState({ status: "error" });
+        setState({ status: "error", attempted: chosen });
       }
     });
+  }
+
+  function next() {
+    if (settings) play(settings);
+  }
+
+  const settingsButton = (
+    <button
+      type="button"
+      onClick={() => setState({ status: "settings", previous: game })}
+      disabled={pending}
+      className="text-sm text-mist underline hover:text-blossom"
+    >
+      {labels.settings}
+    </button>
+  );
+
+  if (state.status === "settings") {
+    const { previous } = state;
+    return (
+      <FreePlaySettings
+        labels={labels}
+        settings={settings ?? defaultSettings}
+        pending={pending}
+        onPlay={play}
+        onCancel={previous && (() => setState(previous))}
+      />
+    );
   }
 
   if (state.status === "error") {
     return (
       <div className="flex flex-col items-center gap-3">
         <p role="alert">{labels.error}</p>
-        <button type="button" onClick={next} disabled={pending} className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
+        <button type="button" onClick={() => play(state.attempted)} disabled={pending} className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
           {labels.retry}
         </button>
+        {settingsButton}
       </div>
     );
   }
@@ -166,9 +220,12 @@ export function FreePlay({ labels, locale, initialPuzzle }: FreePlayProps) {
           </form>
           {state.feedback && <p role="alert" className="text-blossom">{labels[state.feedback]}</p>}
           {hintSection}
-          <button type="button" onClick={abandon} disabled={pending} className="text-sm text-mist underline hover:text-blossom">
-            {labels.giveUp}
-          </button>
+          <div className="flex gap-4">
+            <button type="button" onClick={abandon} disabled={pending} className="text-sm text-mist underline hover:text-blossom">
+              {labels.giveUp}
+            </button>
+            {settingsButton}
+          </div>
         </>
       ) : (
         <>
@@ -187,6 +244,7 @@ export function FreePlay({ labels, locale, initialPuzzle }: FreePlayProps) {
           <button type="button" onClick={next} disabled={pending} aria-busy={pending} className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
             {pending ? labels.loading : labels.next}
           </button>
+          {settingsButton}
         </>
       )}
     </div>

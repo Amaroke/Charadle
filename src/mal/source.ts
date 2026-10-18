@@ -1,5 +1,6 @@
 import { cacheLife } from "next/cache";
 import type { Anime, AnimeSource, Character } from "@/game/draw";
+import { tiers } from "@/game/settings";
 import { malClient } from "@/mal/client";
 
 function client(): AnimeSource {
@@ -8,10 +9,16 @@ function client(): AnimeSource {
   return malClient({ clientId, baseUrl: process.env.MAL_API_URL || undefined });
 }
 
-async function topAnime(limit: number): Promise<Anime[]> {
+const largestTier = Math.max(...tiers);
+
+async function largestTop(): Promise<Anime[]> {
   "use cache";
   cacheLife("days");
-  return client().topAnime(limit);
+  return client().topAnime(largestTier);
+}
+
+async function topAnime(limit: number): Promise<Anime[]> {
+  return (await largestTop()).slice(0, limit);
 }
 
 async function characters(animeId: number): Promise<Character[]> {

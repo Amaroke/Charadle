@@ -31,6 +31,17 @@
     "hints": "Indices",
     "hintAnime": "Révéler l’anime",
     "hintInitials": "Révéler les initiales",
-    "initials": "Initiales :"
+    "initials": "Initiales :",
+    "settings": "Réglages",
+    "settingsIntro": "Choisis d’où viennent les personnages, puis lance la partie.",
+    "pool": "Pool d’animes",
+    "poolHint": "Les animes les plus populaires de MyAnimeList",
+    "difficulty": "Difficulté",
+    "normal": "Normal",
+    "normalHint": "Personnages principaux",
+    "expert": "Expert",
+    "expertHint": "Tous les personnages",
+    "play": "Jouer",
+    "cancel": "Annuler"
   }
 }

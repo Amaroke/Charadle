@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { FreePlay, FreePlaySkeleton } from "@/components/FreePlay";
 import { drawPuzzle } from "@/game/puzzle";
+import { parseSettings, settingsCookie } from "@/game/settings";
 import { currentLocale, getDictionary, type Dictionary } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 
@@ -13,8 +15,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function FirstPuzzle({ labels, locale }: { labels: Dictionary["freePlay"]; locale: Locale }) {
   await connection();
-  const puzzle = await drawPuzzle(locale).catch(() => undefined);
-  return <FreePlay labels={labels} locale={locale} initialPuzzle={puzzle} />;
+  const settings = parseSettings(new URLSearchParams((await cookies()).get(settingsCookie)?.value));
+  const puzzle = settings && (await drawPuzzle(locale, settings).catch(() => undefined));
+  return <FreePlay labels={labels} locale={locale} initialSettings={settings} initialPuzzle={puzzle} />;
 }
 
 export default async function FreePlayPage() {

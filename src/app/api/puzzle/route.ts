@@ -1,7 +1,10 @@
 import { drawPuzzle } from "@/game/puzzle";
+import { parseSettings } from "@/game/settings";
 
 export async function GET(request: Request): Promise<Response> {
-  const locale = new URL(request.url).searchParams.get("locale");
-  const puzzle = await drawPuzzle(locale);
+  const { searchParams } = new URL(request.url);
+  const settings = parseSettings(searchParams);
+  if (!settings) return Response.json({ error: "Invalid settings" }, { status: 400 });
+  const puzzle = await drawPuzzle(searchParams.get("locale"), settings);
   return Response.json(puzzle, { headers: { "Cache-Control": "no-store" } });
 }

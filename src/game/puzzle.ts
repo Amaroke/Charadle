@@ -1,6 +1,7 @@
 import { drawCharacter } from "@/game/draw";
 import type { CharacterNames } from "@/game/guess";
 import { initials, type HintKind } from "@/game/hint";
+import type { Settings } from "@/game/settings";
 import { openTicket, sealTicket } from "@/game/ticket";
 import { localizedTitle } from "@/game/title";
 import { defaultLocale, hasLocale } from "@/i18n/locales";
@@ -35,8 +36,8 @@ export function openPuzzle(ticket: unknown): SealedPuzzle {
   return puzzle;
 }
 
-export async function drawPuzzle(locale: string | null | undefined): Promise<Puzzle> {
-  const { anime, character } = await drawCharacter(malSource);
+export async function drawPuzzle(locale: string | null | undefined, settings: Settings): Promise<Puzzle> {
+  const { anime, character } = await drawCharacter(malSource, settings);
   const animeTitle = await localizedTitle(anime, locale && hasLocale(locale) ? locale : defaultLocale, frenchTitle);
   const reveal: Reveal = {
     character: `${character.firstName} ${character.lastName}`.trim(),
