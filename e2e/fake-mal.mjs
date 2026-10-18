@@ -25,6 +25,8 @@ const characters = {
       node: { id: 723, first_name: "Nami", last_name: "", main_picture: { medium: `${origin}/characters/723.png` } },
       role: "Supporting",
     },
+    { node: { id: 62, first_name: "Zoro", last_name: "Roronoa" }, role: "Supporting" },
+    { node: { id: 305, first_name: "Sanji", last_name: "" }, role: "Supporting" },
   ],
 };
 

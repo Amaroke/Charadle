@@ -1,4 +1,4 @@
-import type { CharacterNames } from "@/game/guess";
+import { isCorrectGuess, type CharacterNames } from "@/game/guess";
 import { isMalList, type AnimePool, type Difficulty, type Settings, type WatchStatus } from "@/game/settings";
 
 export type Anime = {
@@ -41,16 +41,38 @@ export class PoolError extends Error {
 }
 
 const maxAttempts = 5;
+const choiceCount = 4;
+
+function randomIndex(length: number, random: () => number): number {
+  return Math.min(Math.floor(random() * length), length - 1);
+}
 
 function pick<T>(items: T[], random: () => number): T {
-  return items[Math.min(Math.floor(random() * items.length), items.length - 1)];
+  return items[randomIndex(items.length, random)];
+}
+
+function shuffled<T>(items: T[], random: () => number): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = randomIndex(i + 1, random);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+export function fullName(character: CharacterNames): string {
+  return `${character.firstName} ${character.lastName}`.trim();
+}
+
+function hasRole(character: Character, difficulty: Difficulty): boolean {
+  return difficulty === "expert" || character.role === "main";
 }
 
 function isEligible(
   character: Character,
   difficulty: Difficulty,
 ): character is Character & { picture: string } {
-  return (difficulty === "expert" || character.role === "main") && Boolean(character.picture);
+  return hasRole(character, difficulty) && Boolean(character.picture);
 }
 
 async function animePool(source: AnimeSource, pool: AnimePool): Promise<Anime[]> {
@@ -78,4 +100,32 @@ export async function drawCharacter(
   }
   if (remaining.length === 0 && isMalList(settings.pool)) throw new PoolError("empty-pool");
   throw new Error("No eligible character with a picture could be drawn");
+}
+
+export async function drawChoices(
+  source: AnimeSource,
+  settings: Settings,
+  drawn: DrawnCharacter,
+  random: () => number = Math.random,
+): Promise<string[]> {
+  const names = new Set([fullName(drawn.character)]);
+  function offer(characters: Character[]) {
+    for (const character of shuffled(characters, random)) {
+      if (names.size >= choiceCount) return;
+      const name = fullName(character);
+      if (name && !isCorrectGuess(name, drawn.character)) names.add(name);
+    }
+  }
+  const siblings = (await source.characters(drawn.anime.id).catch((): Character[] => [])).filter(
+    ({ id }) => id !== drawn.character.id,
+  );
+  offer(siblings.filter((character) => hasRole(character, settings.difficulty)));
+  offer(siblings.filter((character) => !hasRole(character, settings.difficulty)));
+  if (names.size < choiceCount) {
+    const pool = await animePool(source, settings.pool).catch((): Anime[] => []);
+    const others = shuffled(pool.filter(({ id }) => id !== drawn.anime.id), random).slice(0, maxAttempts);
+    const casts = await Promise.all(others.map((anime) => source.characters(anime.id).catch((): Character[] => [])));
+    for (const characters of casts) offer(characters.filter((character) => hasRole(character, settings.difficulty)));
+  }
+  return shuffled([...names], random);
 }

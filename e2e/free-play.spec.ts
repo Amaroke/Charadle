@@ -215,3 +215,40 @@ test("filters that leave no anime are told clearly", async ({ page }) => {
   await chooseMalList(page, "luffyfan", "10");
   await expect(page.getByText("No anime of this MAL list matches the filters.")).toBeVisible();
 });
+
+async function missThreeTimes(page: Page) {
+  const guess = page.getByRole("textbox", { name: "Character name" });
+  for (const name of ["Nami", "Zoro", "Sanji"]) {
+    await expect(page.getByRole("button", { name: "Multiple choice" })).toBeHidden();
+    await guess.fill(name);
+    await page.getByRole("button", { name: "Guess" }).click();
+    await expect(page.getByText("Not quite! Try again.")).toBeVisible();
+  }
+}
+
+test("the multiple choice appears after three failed guesses and a right pick wins", async ({ page }) => {
+  const responses = await startFreePlay(page);
+  await missThreeTimes(page);
+  expect(responses.join("\n")).not.toMatch(/luffy|monkey/i);
+
+  await page.getByRole("button", { name: "Multiple choice" }).click();
+  const choices = page.getByRole("region", { name: "Pick the character" }).getByRole("button");
+  await expect(choices).toHaveCount(4);
+  await expect(choices).toContainText(["Luffy Monkey D."]);
+  await choices.filter({ hasText: "Luffy Monkey D." }).click();
+  await expect(page.getByText("Well done!")).toBeVisible();
+  await expect(choices.first()).toBeDisabled();
+});
+
+test("a wrong pick in the multiple choice loses the game", async ({ page }) => {
+  await startFreePlay(page);
+  await missThreeTimes(page);
+  await page.getByRole("button", { name: "Multiple choice" }).click();
+  await page.getByRole("region", { name: "Pick the character" }).getByRole("button", { name: "Nami" }).click();
+  await expect(page.getByText("Too bad!")).toBeVisible();
+  await expect(page.locator("[aria-live]").getByText("Luffy Monkey D.")).toBeVisible();
+
+  await page.getByRole("button", { name: "Next character" }).click();
+  await expect(page.getByRole("textbox", { name: "Character name" })).toBeEmpty();
+  await expect(page.getByRole("button", { name: "Multiple choice" })).toBeHidden();
+});
