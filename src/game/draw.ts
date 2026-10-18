@@ -3,6 +3,7 @@ import type { CharacterNames } from "@/game/guess";
 export type Anime = {
   id: number;
   title: string;
+  englishTitle?: string;
 };
 
 export type Character = CharacterNames & {

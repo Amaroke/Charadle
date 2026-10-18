@@ -43,7 +43,8 @@ export function malClient({
       });
       return ranking.data.map(({ node }) => ({
         id: node.id,
-        title: node.alternative_titles?.en || node.title,
+        title: node.title,
+        englishTitle: node.alternative_titles?.en,
       }));
     },
 
