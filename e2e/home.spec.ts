@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("home page shows the logo and the falling petals", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/en");
 
   await expect(page).toHaveTitle("Charadle");
   await expect(page.getByRole("heading", { level: 1, name: "Charadle" })).toBeVisible();
@@ -10,7 +10,7 @@ test("home page shows the logo and the falling petals", async ({ page }) => {
 });
 
 test("home page fits the viewport width", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/en");
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
