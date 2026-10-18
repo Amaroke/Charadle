@@ -1,7 +1,8 @@
 {
   "home": {
     "logoAlt": "Logo de Charadle",
-    "tagline": "Devine le personnage d'anime à partir de son image."
+    "tagline": "Devine le personnage d'anime à partir de son image.",
+    "play": "Mode libre"
   },
   "languageSwitcher": {
     "label": "Langue"
@@ -9,5 +10,23 @@
   "languages": {
     "en": "English",
     "fr": "Français"
+  },
+  "freePlay": {
+    "title": "Mode libre",
+    "pictureAlt": "Personnage à deviner",
+    "guessLabel": "Nom du personnage",
+    "guessPlaceholder": "Prénom, nom ou alias",
+    "submit": "Deviner",
+    "giveUp": "Abandonner",
+    "next": "Personnage suivant",
+    "wrong": "Raté ! Réessaie.",
+    "failed": "Une erreur est survenue. Réessaie.",
+    "won": "Bravo !",
+    "lost": "Dommage !",
+    "character": "Personnage :",
+    "anime": "Anime :",
+    "loading": "Tirage d’un personnage…",
+    "error": "Impossible de tirer un personnage.",
+    "retry": "Réessayer"
   }
 }
