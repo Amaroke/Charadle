@@ -4,7 +4,10 @@ import { drawCharacter } from "@/game/draw";
 import { isCorrectGuess, type CharacterNames } from "@/game/guess";
 import { initials, type HintKind } from "@/game/hint";
 import { openTicket, sealTicket } from "@/game/ticket";
+import { localizedTitle } from "@/game/title";
+import { defaultLocale, hasLocale } from "@/i18n/locales";
 import { malSource } from "@/mal/source";
+import { frenchTitle } from "@/wikidata/source";
 
 export type Reveal = {
   character: string;
@@ -37,13 +40,14 @@ function open(ticket: unknown): SealedPuzzle {
   return puzzle;
 }
 
-export async function startPuzzle(): Promise<Puzzle> {
+export async function startPuzzle(locale: string): Promise<Puzzle> {
   const { anime, character } = await drawCharacter(malSource);
+  const animeTitle = await localizedTitle(anime, hasLocale(locale) ? locale : defaultLocale, frenchTitle);
   const sealed: SealedPuzzle = {
     names: { firstName: character.firstName, lastName: character.lastName, aliases: character.aliases },
     reveal: {
       character: `${character.firstName} ${character.lastName}`.trim(),
-      anime: anime.title,
+      anime: animeTitle,
     },
   };
   return { ticket: sealTicket(sealed, secret()), picture: character.picture };

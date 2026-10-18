@@ -6,7 +6,7 @@ const origin = `http://localhost:${port}`;
 const picture = readFileSync(new URL("../public/images/logo.png", import.meta.url));
 
 const ranking = {
-  data: [{ node: { id: 21, title: "One Piece", alternative_titles: { en: "One Piece" } } }],
+  data: [{ node: { id: 21, title: "Wan Pīsu", alternative_titles: { en: "One Piece" } } }],
 };
 
 const characters = {
@@ -28,13 +28,22 @@ const characters = {
   ],
 };
 
+const frenchTitles = { 21: "One Piece (VF)" };
+
+function sparql(query) {
+  const animeId = query?.match(/wdt:P4086 "(\d+)"/)?.[1];
+  const label = frenchTitles[animeId];
+  return { results: { bindings: label ? [{ label: { "xml:lang": "fr", type: "literal", value: label } }] : [] } };
+}
+
 function json(response, body) {
   response.writeHead(200, { "content-type": "application/json" });
   response.end(JSON.stringify(body));
 }
 
 createServer((request, response) => {
-  const { pathname } = new URL(request.url, origin);
+  const { pathname, searchParams } = new URL(request.url, origin);
+  if (pathname === "/sparql") return json(response, sparql(searchParams.get("query")));
   if (pathname.startsWith("/characters/")) {
     response.writeHead(200, { "content-type": "image/png" });
     return response.end(picture);

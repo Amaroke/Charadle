@@ -5,9 +5,11 @@ import { useEffect, useRef, useState, useTransition, type FormEvent } from "reac
 import { giveUp, revealHint, startPuzzle, submitGuess, type Puzzle, type Reveal } from "@/game/actions";
 import type { HintKind } from "@/game/hint";
 import type { Dictionary } from "@/i18n/dictionaries";
+import type { Locale } from "@/i18n/locales";
 
 type FreePlayProps = {
   labels: Dictionary["freePlay"];
+  locale: Locale;
   initialPuzzle?: Puzzle;
 };
 
@@ -25,13 +27,13 @@ function preloadPicture(src: string): Promise<void> {
   });
 }
 
-async function drawWithPicture(): Promise<Puzzle> {
-  const puzzle = await startPuzzle();
+async function drawWithPicture(locale: Locale): Promise<Puzzle> {
+  const puzzle = await startPuzzle(locale);
   await preloadPicture(puzzle.picture);
   return puzzle;
 }
 
-export function FreePlay({ labels, initialPuzzle }: FreePlayProps) {
+export function FreePlay({ labels, locale, initialPuzzle }: FreePlayProps) {
   const [state, setState] = useState<State>(
     initialPuzzle ? { status: "playing", puzzle: initialPuzzle } : { status: "error" },
   );
@@ -43,13 +45,13 @@ export function FreePlay({ labels, initialPuzzle }: FreePlayProps) {
 
   useEffect(() => {
     if (!ticket) return;
-    const draw = drawWithPicture();
+    const draw = drawWithPicture(locale);
     draw.catch(() => {});
     upcoming.current = draw;
-  }, [ticket]);
+  }, [ticket, locale]);
 
   function next() {
-    const draw = upcoming.current ?? drawWithPicture();
+    const draw = upcoming.current ?? drawWithPicture(locale);
     upcoming.current = null;
     startTransition(async () => {
       try {

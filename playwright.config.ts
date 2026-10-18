@@ -30,6 +30,7 @@ export default defineConfig({
       env: {
         MAL_API_URL: `http://localhost:${fakeMalPort}/v2`,
         MAL_CLIENT_ID: "e2e-client-id",
+        WIKIDATA_URL: `http://localhost:${fakeMalPort}/sparql`,
         GAME_SECRET: "e2e-game-secret",
       },
       reuseExistingServer: !process.env.CI,

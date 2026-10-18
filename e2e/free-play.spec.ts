@@ -71,6 +71,15 @@ test("free play speaks French on the French route", async ({ page }) => {
   await expect(page.getByText("Dommage !")).toBeVisible();
 });
 
+test("the anime title is shown in French on the French route", async ({ page }) => {
+  await page.goto("/fr/play");
+  await page.getByRole("button", { name: "Abandonner" }).click();
+  await expect(page.getByText("One Piece (VF)")).toBeVisible();
+  await page.getByRole("button", { name: "Personnage suivant" }).click();
+  await page.getByRole("button", { name: "Révéler l’anime" }).click();
+  await expect(page.getByText("One Piece (VF)")).toBeVisible();
+});
+
 test("the first character is drawn by the server", async ({ request }) => {
   const html = await (await request.get("/en/play")).text();
   expect(html.match(/alt="Character to guess"/g)).toHaveLength(1);
