@@ -1,7 +1,8 @@
 {
   "home": {
     "logoAlt": "Charadle logo",
-    "tagline": "Guess the anime character from their picture."
+    "tagline": "Guess the anime character from their picture.",
+    "play": "Free play"
   },
   "languageSwitcher": {
     "label": "Language"
@@ -9,5 +10,23 @@
   "languages": {
     "en": "English",
     "fr": "Français"
+  },
+  "freePlay": {
+    "title": "Free play",
+    "pictureAlt": "Character to guess",
+    "guessLabel": "Character name",
+    "guessPlaceholder": "First name, last name or alias",
+    "submit": "Guess",
+    "giveUp": "Give up",
+    "next": "Next character",
+    "wrong": "Not quite! Try again.",
+    "failed": "Something went wrong. Try again.",
+    "won": "Well done!",
+    "lost": "Too bad!",
+    "character": "Character:",
+    "anime": "Anime:",
+    "loading": "Drawing a character…",
+    "error": "Could not draw a character.",
+    "retry": "Try again"
   }
 }

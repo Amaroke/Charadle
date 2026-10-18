@@ -1,8 +1,10 @@
 import Image from "next/image";
+import Link from "next/link";
 import { SakuraPetals } from "@/components/SakuraPetals";
-import { getDictionary } from "@/i18n/dictionaries";
+import { currentLocale, getDictionary } from "@/i18n/dictionaries";
 
 export default async function Home() {
+  const locale = await currentLocale();
   const dict = await getDictionary();
 
   return (
@@ -23,6 +25,12 @@ export default async function Home() {
         <p className="max-w-sm text-base text-mist sm:max-w-md sm:text-lg">
           {dict.home.tagline}
         </p>
+        <Link
+          href={`/${locale}/play`}
+          className="relative rounded bg-sakura px-6 py-3 text-lg font-bold text-ink hover:bg-blossom"
+        >
+          {dict.home.play}
+        </Link>
       </main>
     </>
   );
