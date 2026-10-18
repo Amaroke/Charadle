@@ -1,9 +1,21 @@
 # Charadle
 
-Charadle is a fun little website where you take a shot at guessing the anime character on the right.
+Charadle is a web game where you guess an anime character from their picture.
 
-## Possible additions
+The previous version lives under the `v1-legacy` tag.
 
-* Check user existence.<br/>
-* Accept a margin of error in the entry.<br/>
-* Add more gamemodes (ex : "find the anime").<br/>
+## Development
+
+Requires Node 24 and pnpm (via Corepack).
+
+```bash
+corepack pnpm install
+corepack pnpm dev
+```
+
+| Command | Purpose |
+| --- | --- |
+| `pnpm lint` | ESLint |
+| `pnpm typecheck` | TypeScript |
+| `pnpm test` | Vitest unit tests |
+| `pnpm test:e2e` | Playwright end-to-end tests |
