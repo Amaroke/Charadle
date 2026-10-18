@@ -1,45 +1,63 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState, useTransition, type FormEvent } from "react";
+import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
 import { giveUp, startPuzzle, submitGuess, type Puzzle, type Reveal } from "@/game/actions";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 type FreePlayProps = {
   labels: Dictionary["freePlay"];
+  initialPuzzle?: Puzzle;
 };
 
 type State =
-  | { status: "loading" }
   | { status: "error" }
   | { status: "playing"; puzzle: Puzzle; feedback?: "wrong" | "failed" }
   | { status: "over"; puzzle: Puzzle; won: boolean; reveal: Reveal };
 
-export function FreePlay({ labels }: FreePlayProps) {
-  const [state, setState] = useState<State>({ status: "loading" });
+function preloadPicture(src: string): Promise<void> {
+  return new Promise((resolve) => {
+    const picture = new window.Image();
+    picture.onload = () => resolve();
+    picture.onerror = () => resolve();
+    picture.src = src;
+  });
+}
+
+async function drawWithPicture(): Promise<Puzzle> {
+  const puzzle = await startPuzzle();
+  await preloadPicture(puzzle.picture);
+  return puzzle;
+}
+
+export function FreePlay({ labels, initialPuzzle }: FreePlayProps) {
+  const [state, setState] = useState<State>(
+    initialPuzzle ? { status: "playing", puzzle: initialPuzzle } : { status: "error" },
+  );
   const [guess, setGuess] = useState("");
   const [pending, startTransition] = useTransition();
+  const upcoming = useRef<Promise<Puzzle> | null>(null);
+  const ticket = state.status === "error" ? undefined : state.puzzle.ticket;
 
-  const load = useCallback(() => {
+  useEffect(() => {
+    if (!ticket) return;
+    const draw = drawWithPicture();
+    draw.catch(() => {});
+    upcoming.current = draw;
+  }, [ticket]);
+
+  function next() {
+    const draw = upcoming.current ?? drawWithPicture();
+    upcoming.current = null;
     startTransition(async () => {
       try {
-        setState({ status: "playing", puzzle: await startPuzzle() });
+        const puzzle = await draw;
+        setGuess("");
+        setState({ status: "playing", puzzle });
       } catch {
         setState({ status: "error" });
       }
     });
-  }, []);
-
-  useEffect(load, [load]);
-
-  function next() {
-    setState({ status: "loading" });
-    setGuess("");
-    load();
-  }
-
-  if (state.status === "loading") {
-    return <p role="status" className="text-mist">{labels.loading}</p>;
   }
 
   if (state.status === "error") {
@@ -81,15 +99,18 @@ export function FreePlay({ labels }: FreePlayProps) {
 
   return (
     <div className="flex w-full max-w-sm flex-col items-center gap-4">
-      <Image
-        src={puzzle.picture}
-        alt={labels.pictureAlt}
-        width={225}
-        height={350}
-        unoptimized
-        priority
-        className="h-auto max-h-87.5 w-auto rounded-lg shadow-lg"
-      />
+      <div className="flex h-87.5 items-center justify-center">
+        <Image
+          key={puzzle.ticket}
+          src={puzzle.picture}
+          alt={labels.pictureAlt}
+          width={225}
+          height={350}
+          unoptimized
+          priority
+          className="h-auto max-h-87.5 w-auto rounded-lg shadow-lg"
+        />
+      </div>
       {state.status === "playing" ? (
         <>
           <form onSubmit={submit} className="flex w-full gap-2">
@@ -125,11 +146,25 @@ export function FreePlay({ labels }: FreePlayProps) {
               <span className="font-bold">{state.reveal.anime}</span>
             </p>
           </section>
-          <button type="button" onClick={next} disabled={pending} className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
-            {labels.next}
+          <button type="button" onClick={next} disabled={pending} aria-busy={pending} className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
+            {pending ? labels.loading : labels.next}
           </button>
         </>
       )}
+    </div>
+  );
+}
+
+export function FreePlaySkeleton({ label }: { label: string }) {
+  return (
+    <div className="flex w-full max-w-sm flex-col items-center gap-4" aria-busy="true">
+      <p role="status" className="sr-only">{label}</p>
+      <div className="h-87.5 w-56.25 animate-pulse rounded-lg bg-ink" />
+      <div className="flex w-full gap-2">
+        <div className="h-10.5 flex-1 animate-pulse rounded bg-ink" />
+        <div className="h-10.5 w-20 animate-pulse rounded bg-ink" />
+      </div>
+      <div className="h-5 w-16 animate-pulse rounded bg-ink" />
     </div>
   );
 }
