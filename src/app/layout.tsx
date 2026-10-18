@@ -1,5 +1,4 @@
 import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -32,7 +31,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col font-sans xl:bg-[url(/images/background.png)] xl:bg-cover xl:bg-fixed xl:bg-no-repeat">
         {children}
         <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );
