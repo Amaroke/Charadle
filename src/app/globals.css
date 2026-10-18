@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-night: #232428;
+  --color-ink: #1d1d20;
+  --color-sakura: #feb9ce;
+  --color-blossom: #ff4775;
+  --color-lilac: #c78bc8;
+  --color-mist: #a3a3a8;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --animate-petal-fall: petal-fall 10s linear infinite;
+
+  @keyframes petal-fall {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(105vh) rotate(180deg);
+      opacity: 0.2;
+    }
+  }
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-night);
+  color: #ffffff;
+}
