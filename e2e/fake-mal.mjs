@@ -33,7 +33,7 @@ const frenchTitles = { 21: "One Piece (VF)" };
 function sparql(query) {
   const animeId = query?.match(/wdt:P4086 "(\d+)"/)?.[1];
   const label = frenchTitles[animeId];
-  return { results: { bindings: label ? [{ label: { "xml:lang": "fr", type: "literal", value: label } }] : [] } };
+  return { results: { bindings: label ? [{ itemLabel: { "xml:lang": "fr", type: "literal", value: label } }] : [] } };
 }
 
 function json(response, body) {
