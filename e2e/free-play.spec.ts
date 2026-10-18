@@ -96,3 +96,19 @@ test("the next character is drawn before it is asked for", async ({ page }) => {
   await page.getByRole("button", { name: "Next character" }).click();
   await expect(page.getByRole("textbox", { name: "Character name" })).toBeVisible();
 });
+
+test("hints answer while the next character is still being drawn", async ({ page }) => {
+  await page.route("**/api/puzzle**", () => {});
+  await startFreePlay(page);
+  await page.getByRole("button", { name: "Reveal the initials" }).click();
+  await expect(page.getByText("L. M. D.")).toBeVisible({ timeout: 2000 });
+  await page.getByRole("button", { name: "Reveal the anime" }).click();
+  await expect(page.getByText("One Piece")).toBeVisible({ timeout: 2000 });
+});
+
+test("hints are stacked one above the other", async ({ page }) => {
+  await startFreePlay(page);
+  const anime = await page.getByRole("button", { name: "Reveal the anime" }).boundingBox();
+  const initials = await page.getByRole("button", { name: "Reveal the initials" }).boundingBox();
+  expect(initials!.y).toBeGreaterThanOrEqual(anime!.y + anime!.height);
+});

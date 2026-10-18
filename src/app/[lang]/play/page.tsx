@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { FreePlay, FreePlaySkeleton } from "@/components/FreePlay";
-import { startPuzzle } from "@/game/actions";
+import { drawPuzzle } from "@/game/puzzle";
 import { currentLocale, getDictionary, type Dictionary } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 
@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function FirstPuzzle({ labels, locale }: { labels: Dictionary["freePlay"]; locale: Locale }) {
   await connection();
-  const puzzle = await startPuzzle(locale).catch(() => undefined);
+  const puzzle = await drawPuzzle(locale).catch(() => undefined);
   return <FreePlay labels={labels} locale={locale} initialPuzzle={puzzle} />;
 }
 

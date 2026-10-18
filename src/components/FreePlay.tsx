@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
-import { giveUp, revealHint, startPuzzle, submitGuess, type Puzzle, type Reveal } from "@/game/actions";
+import { giveUp, revealHint, submitGuess } from "@/game/actions";
 import type { HintKind } from "@/game/hint";
+import type { Puzzle, Reveal } from "@/game/puzzle";
 import type { Dictionary } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 
@@ -28,7 +29,9 @@ function preloadPicture(src: string): Promise<void> {
 }
 
 async function drawWithPicture(locale: Locale): Promise<Puzzle> {
-  const puzzle = await startPuzzle(locale);
+  const response = await fetch(`/api/puzzle?${new URLSearchParams({ locale })}`, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Puzzle draw answered ${response.status}`);
+  const puzzle = (await response.json()) as Puzzle;
   await preloadPicture(puzzle.picture);
   return puzzle;
 }
@@ -119,7 +122,7 @@ export function FreePlay({ labels, locale, initialPuzzle }: FreePlayProps) {
   ];
 
   const hintSection = (
-    <section aria-label={labels.hints} className="flex w-full flex-wrap justify-center gap-2">
+    <section aria-label={labels.hints} className="flex w-full flex-col items-center gap-2">
       {hintRows.map(({ kind, label, button }) =>
         hints[kind] ? (
           <p key={kind} className="rounded border border-mist/40 px-3 py-1 text-sm">
