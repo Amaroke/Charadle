@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
-import { giveUp, startPuzzle, submitGuess, type Puzzle, type Reveal } from "@/game/actions";
+import { giveUp, revealHint, startPuzzle, submitGuess, type Puzzle, type Reveal } from "@/game/actions";
+import type { HintKind } from "@/game/hint";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 type FreePlayProps = {
@@ -35,6 +36,7 @@ export function FreePlay({ labels, initialPuzzle }: FreePlayProps) {
     initialPuzzle ? { status: "playing", puzzle: initialPuzzle } : { status: "error" },
   );
   const [guess, setGuess] = useState("");
+  const [hints, setHints] = useState<Partial<Record<HintKind, string>>>({});
   const [pending, startTransition] = useTransition();
   const upcoming = useRef<Promise<Puzzle> | null>(null);
   const ticket = state.status === "error" ? undefined : state.puzzle.ticket;
@@ -53,6 +55,7 @@ export function FreePlay({ labels, initialPuzzle }: FreePlayProps) {
       try {
         const puzzle = await draw;
         setGuess("");
+        setHints({});
         setState({ status: "playing", puzzle });
       } catch {
         setState({ status: "error" });
@@ -97,6 +100,45 @@ export function FreePlay({ labels, initialPuzzle }: FreePlayProps) {
     });
   }
 
+  function requestHint(kind: HintKind) {
+    startTransition(async () => {
+      try {
+        const value = await revealHint(puzzle.ticket, kind);
+        setHints((current) => ({ ...current, [kind]: value }));
+      } catch {
+        setState({ status: "playing", puzzle, feedback: "failed" });
+      }
+    });
+  }
+
+  const hintRows: { kind: HintKind; label: string; button: string }[] = [
+    { kind: "anime", label: labels.anime, button: labels.hintAnime },
+    { kind: "initials", label: labels.initials, button: labels.hintInitials },
+  ];
+
+  const hintSection = (
+    <section aria-label={labels.hints} className="flex w-full flex-wrap justify-center gap-2">
+      {hintRows.map(({ kind, label, button }) =>
+        hints[kind] ? (
+          <p key={kind} className="rounded border border-mist/40 px-3 py-1 text-sm">
+            <span className="text-mist">{label} </span>
+            <span className="font-bold">{hints[kind]}</span>
+          </p>
+        ) : (
+          <button
+            key={kind}
+            type="button"
+            onClick={() => requestHint(kind)}
+            disabled={pending || state.status !== "playing"}
+            className="rounded border border-sakura px-3 py-1 text-sm text-sakura hover:bg-sakura hover:text-ink disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-sakura"
+          >
+            {button}
+          </button>
+        ),
+      )}
+    </section>
+  );
+
   return (
     <div className="flex w-full max-w-sm flex-col items-center gap-4">
       <div className="flex h-87.5 items-center justify-center">
@@ -129,6 +171,7 @@ export function FreePlay({ labels, initialPuzzle }: FreePlayProps) {
             </button>
           </form>
           {state.feedback && <p role="alert" className="text-blossom">{labels[state.feedback]}</p>}
+          {hintSection}
           <button type="button" onClick={abandon} disabled={pending} className="text-sm text-mist underline hover:text-blossom">
             {labels.giveUp}
           </button>
@@ -146,6 +189,7 @@ export function FreePlay({ labels, initialPuzzle }: FreePlayProps) {
               <span className="font-bold">{state.reveal.anime}</span>
             </p>
           </section>
+          {hintSection}
           <button type="button" onClick={next} disabled={pending} aria-busy={pending} className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
             {pending ? labels.loading : labels.next}
           </button>
