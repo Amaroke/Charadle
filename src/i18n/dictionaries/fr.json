@@ -2,7 +2,8 @@
   "home": {
     "logoAlt": "Logo de Charadle",
     "tagline": "Devine le personnage d'anime à partir de son image.",
-    "play": "Mode libre"
+    "play": "Mode libre",
+    "daily": "Daily"
   },
   "languageSwitcher": {
     "label": "Langue"
@@ -59,5 +60,28 @@
     "unknownUser": "Aucun utilisateur MyAnimeList n’a ce pseudo.",
     "privateList": "Cette MAL list est privée.",
     "emptyPool": "Aucun anime de cette MAL list ne correspond aux filtres."
+  },
+  "daily": {
+    "title": "Daily",
+    "pictureAlt": "Personnage à deviner",
+    "guessLabel": "Nom du personnage",
+    "guessPlaceholder": "Prénom, nom ou alias",
+    "submit": "Deviner",
+    "tier": "Top {tier}",
+    "guessesLeft": "Essais restants : {count}",
+    "wrong": "Raté ! Plus qu’un essai sur ce palier.",
+    "tierFailed": "Raté ! Place au palier suivant.",
+    "failed": "Un problème est survenu. Réessaie.",
+    "expired": "Un nouveau Daily a commencé.",
+    "reload": "Le jouer",
+    "won": "Trouvé !",
+    "lost": "Tous les paliers sont ratés.",
+    "score": "Score du Daily : {score}/{max}",
+    "revealed": "Personnages des paliers terminés",
+    "found": "Trouvé",
+    "missed": "Raté",
+    "comeBack": "Un nouveau Daily commence chaque jour à 12:00 UTC.",
+    "error": "Impossible de charger le Daily.",
+    "loading": "Chargement du Daily…"
   }
 }

@@ -19,3 +19,7 @@ corepack pnpm dev
 | `pnpm typecheck` | TypeScript |
 | `pnpm test` | Vitest unit tests |
 | `pnpm test:e2e` | Playwright end-to-end tests |
+| `pnpm db:generate` | Drizzle migration from `src/db/schema.ts` |
+| `pnpm db:migrate` | Apply the migrations to `DATABASE_URL` |
+
+`DATABASE_URL` is the Neon connection string, or `memory:` for an in-process PGlite database. `CRON_SECRET` protects `/api/cron/daily`, which Vercel calls at 12:00 UTC to draw the Daily.

@@ -2,7 +2,8 @@
   "home": {
     "logoAlt": "Charadle logo",
     "tagline": "Guess the anime character from their picture.",
-    "play": "Free play"
+    "play": "Free play",
+    "daily": "Daily"
   },
   "languageSwitcher": {
     "label": "Language"
@@ -59,5 +60,28 @@
     "unknownUser": "No MyAnimeList user has this username.",
     "privateList": "This MAL list is private.",
     "emptyPool": "No anime of this MAL list matches the filters."
+  },
+  "daily": {
+    "title": "Daily",
+    "pictureAlt": "Character to guess",
+    "guessLabel": "Character name",
+    "guessPlaceholder": "First name, last name or alias",
+    "submit": "Guess",
+    "tier": "Top {tier}",
+    "guessesLeft": "Guesses left: {count}",
+    "wrong": "Not quite! One Guess left on this Tier.",
+    "tierFailed": "Missed! On to the next Tier.",
+    "failed": "Something went wrong. Try again.",
+    "expired": "A new Daily has started.",
+    "reload": "Play it",
+    "won": "Found!",
+    "lost": "Every Tier missed.",
+    "score": "Daily score: {score}/{max}",
+    "revealed": "Characters of the ended Tiers",
+    "found": "Found",
+    "missed": "Missed",
+    "comeBack": "A new Daily starts every day at 12:00 UTC.",
+    "error": "Could not load the Daily.",
+    "loading": "Loading the Daily…"
   }
 }

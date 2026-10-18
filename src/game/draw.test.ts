@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { drawCharacter, drawChoices, PoolError, type AnimeSource, type Character, type DrawnCharacter, type ListedAnime } from "@/game/draw";
+import { drawCharacter, drawChoices, drawDaily, PoolError, type AnimeSource, type Character, type DrawnCharacter, type ListedAnime } from "@/game/draw";
+import { dailyTiers } from "@/game/daily";
 import type { Settings } from "@/game/settings";
 
 function character(id: number, overrides: Partial<Character> = {}): Character {
@@ -281,5 +282,50 @@ describe("drawChoices", () => {
       places.add(choices.indexOf("First10 Last10"));
     }
     expect(places.size).toBeGreaterThan(1);
+  });
+});
+
+describe("drawDaily", () => {
+  function rankedSource(size: number, cast: (animeId: number) => Character[]): AnimeSource {
+    const ranking = Array.from({ length: size }, (_, index) => ({ id: index + 1, title: `Anime ${index + 1}` }));
+    return {
+      async malList() {
+        return [];
+      },
+      async topAnime(limit) {
+        return ranking.slice(0, limit);
+      },
+      async characters(animeId) {
+        return cast(animeId);
+      },
+    };
+  }
+
+  const mainCast = (animeId: number) => [character(animeId * 10, { role: "supporting" }), character(animeId * 10 + 1)];
+
+  it("draws one main Character per Tier, each within its Top N", async () => {
+    const tiers = await drawDaily(rankedSource(500, mainCast), dailyTiers, () => 0.99999);
+    expect(tiers).toHaveLength(7);
+    expect(tiers.map(({ character }) => character.role)).toEqual(Array(7).fill("main"));
+    expect(tiers.map(({ anime }) => anime.id)).toEqual([500, 200, 100, 50, 20, 10, 5]);
+  });
+
+  it("draws a different Anime for every Tier", async () => {
+    const tiers = await drawDaily(rankedSource(7, mainCast), dailyTiers, () => 0);
+    expect(new Set(tiers.map(({ anime }) => anime.id)).size).toBe(7);
+    expect(tiers.at(-1)!.anime.id).toBe(1);
+  });
+
+  it("skips an Anime without a main Character with a picture", async () => {
+    const tiers = await drawDaily(
+      rankedSource(8, (animeId) => (animeId === 1 ? [character(10, { role: "supporting" })] : mainCast(animeId))),
+      dailyTiers,
+      () => 0,
+    );
+    expect(tiers.map(({ anime }) => anime.id)).not.toContain(1);
+  });
+
+  it("fails when the ranking has too few Anime", async () => {
+    await expect(drawDaily(rankedSource(6, mainCast), dailyTiers, () => 0)).rejects.toThrow();
   });
 });

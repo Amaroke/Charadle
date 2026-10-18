@@ -1,5 +1,5 @@
 import { isCorrectGuess, type CharacterNames } from "@/game/guess";
-import { isMalList, type AnimePool, type Difficulty, type Settings, type WatchStatus } from "@/game/settings";
+import { isMalList, type AnimePool, type Difficulty, type Settings, type Tier, type WatchStatus } from "@/game/settings";
 
 export type Anime = {
   id: number;
@@ -85,21 +85,48 @@ async function animePool(source: AnimeSource, pool: AnimePool): Promise<Anime[]>
   return kept;
 }
 
+async function drawFrom(
+  source: AnimeSource,
+  remaining: Anime[],
+  difficulty: Difficulty,
+  random: () => number,
+): Promise<DrawnCharacter | undefined> {
+  for (let attempt = 0; attempt < maxAttempts && remaining.length > 0; attempt++) {
+    const anime = pick(remaining, random);
+    const characters = await source.characters(anime.id).catch((): Character[] => []);
+    const eligible = characters.filter((character) => isEligible(character, difficulty));
+    if (eligible.length > 0) return { anime, character: pick(eligible, random) };
+    remaining.splice(remaining.indexOf(anime), 1);
+  }
+  return undefined;
+}
+
 export async function drawCharacter(
   source: AnimeSource,
   settings: Settings,
   random: () => number = Math.random,
 ): Promise<DrawnCharacter> {
   const remaining = await animePool(source, settings.pool);
-  for (let attempt = 0; attempt < maxAttempts && remaining.length > 0; attempt++) {
-    const anime = pick(remaining, random);
-    const characters = await source.characters(anime.id).catch((): Character[] => []);
-    const eligible = characters.filter((character) => isEligible(character, settings.difficulty));
-    if (eligible.length > 0) return { anime, character: pick(eligible, random) };
-    remaining.splice(remaining.indexOf(anime), 1);
-  }
+  const drawn = await drawFrom(source, remaining, settings.difficulty, random);
+  if (drawn) return drawn;
   if (remaining.length === 0 && isMalList(settings.pool)) throw new PoolError("empty-pool");
   throw new Error("No eligible character with a picture could be drawn");
+}
+
+export async function drawDaily(
+  source: AnimeSource,
+  tiers: readonly Tier[],
+  random: () => number = Math.random,
+): Promise<DrawnCharacter[]> {
+  const drawnTiers: DrawnCharacter[] = [];
+  for (const tier of [...tiers].reverse()) {
+    const used = new Set(drawnTiers.map(({ anime }) => anime.id));
+    const remaining = (await source.topAnime(tier)).filter(({ id }) => !used.has(id));
+    const drawn = await drawFrom(source, remaining, "normal", random);
+    if (!drawn) throw new Error(`No main character with a picture could be drawn for the Top ${tier}`);
+    drawnTiers.unshift(drawn);
+  }
+  return drawnTiers;
 }
 
 export async function drawChoices(

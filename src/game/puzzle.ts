@@ -2,7 +2,7 @@ import { drawCharacter, drawChoices, fullName } from "@/game/draw";
 import type { CharacterNames } from "@/game/guess";
 import { initials, type HintKind } from "@/game/hint";
 import type { Settings } from "@/game/settings";
-import { openTicket, sealTicket } from "@/game/ticket";
+import { gameSecret, openTicket, sealTicket } from "@/game/ticket";
 import { localizedTitle } from "@/game/title";
 import { defaultLocale, hasLocale } from "@/i18n/locales";
 import { malSource } from "@/mal/source";
@@ -25,14 +25,8 @@ type SealedPuzzle = {
   choices: string[];
 };
 
-function secret(): string {
-  const value = process.env.GAME_SECRET;
-  if (!value) throw new Error("GAME_SECRET is not set");
-  return value;
-}
-
 export function openPuzzle(ticket: unknown): SealedPuzzle {
-  const puzzle = typeof ticket === "string" ? openTicket<SealedPuzzle>(ticket, secret()) : undefined;
+  const puzzle = typeof ticket === "string" ? openTicket<SealedPuzzle>(ticket, gameSecret()) : undefined;
   if (!puzzle) throw new Error("Invalid ticket");
   return puzzle;
 }
@@ -54,7 +48,7 @@ export async function drawPuzzle(locale: string | null | undefined, settings: Se
     choices,
   };
   return {
-    ticket: sealTicket(sealed, secret()),
+    ticket: sealTicket(sealed, gameSecret()),
     picture: character.picture,
     hints: { anime: reveal.anime, initials: initials(reveal.character) },
   };

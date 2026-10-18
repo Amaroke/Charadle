@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
 import { giveUp, multipleChoice, pickChoice, submitGuess } from "@/game/actions";
 import { PoolError, poolProblems, type PoolProblem } from "@/game/draw";
+import { maxGuessLength } from "@/game/guess";
 import type { HintKind } from "@/game/hint";
 import type { Puzzle, Reveal } from "@/game/puzzle";
 import { defaultSettings, settingsCookie, settingsParams, type Settings } from "@/game/settings";
@@ -282,7 +283,7 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initi
               onChange={(event) => setGuess(event.target.value)}
               placeholder={labels.guessPlaceholder}
               autoComplete="off"
-              maxLength={100}
+              maxLength={maxGuessLength}
               className="min-w-0 flex-1 rounded border border-mist/40 bg-ink px-3 py-2 placeholder:text-mist focus:border-sakura focus:outline-none"
             />
             <button type="submit" disabled={pending} className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
