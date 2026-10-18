@@ -19,7 +19,7 @@ test("a won game reveals the character and the next one comes without reloading"
   await guess.fill("Nami");
   await page.getByRole("button", { name: "Guess" }).click();
   await expect(page.getByText("Not quite! Try again.")).toBeVisible();
-  expect(responses.join("\n")).not.toMatch(/luffy|one piece/i);
+  expect(responses.join("\n")).not.toMatch(/luffy|monkey/i);
 
   await guess.fill("lufy");
   await page.getByRole("button", { name: "Guess" }).click();
@@ -43,13 +43,14 @@ test("giving up reveals the character and the anime", async ({ page }) => {
 
 test("each hint is used once and the hints are disabled once the game is over", async ({ page }) => {
   const responses = await startFreePlay(page);
+  await expect(page.getByText("One Piece")).toBeHidden();
   const animeHint = page.getByRole("button", { name: "Reveal the anime" });
   const initialsHint = page.getByRole("button", { name: "Reveal the initials" });
 
   await initialsHint.click();
   await expect(page.getByText("L. M. D.")).toBeVisible();
   await expect(initialsHint).toBeHidden();
-  expect(responses.join("\n")).not.toMatch(/luffy|monkey|one piece/i);
+  expect(responses.join("\n")).not.toMatch(/luffy|monkey/i);
 
   await animeHint.click();
   await expect(page.getByText("One Piece")).toBeVisible();
@@ -83,7 +84,7 @@ test("the anime title is shown in French on the French route", async ({ page }) 
 test("the first character is drawn by the server", async ({ request }) => {
   const html = await (await request.get("/en/play")).text();
   expect(html.match(/alt="Character to guess"/g)).toHaveLength(1);
-  expect(html).not.toMatch(/luffy|one piece/i);
+  expect(html).not.toMatch(/luffy|monkey/i);
 });
 
 test("the next character is drawn before it is asked for", async ({ page }) => {
@@ -97,9 +98,9 @@ test("the next character is drawn before it is asked for", async ({ page }) => {
   await expect(page.getByRole("textbox", { name: "Character name" })).toBeVisible();
 });
 
-test("hints answer while the next character is still being drawn", async ({ page }) => {
-  await page.route("**/api/puzzle**", () => {});
+test("hints are revealed without asking the server", async ({ page }) => {
   await startFreePlay(page);
+  await page.route("**/*", (route) => route.abort());
   await page.getByRole("button", { name: "Reveal the initials" }).click();
   await expect(page.getByText("L. M. D.")).toBeVisible({ timeout: 2000 });
   await page.getByRole("button", { name: "Reveal the anime" }).click();
