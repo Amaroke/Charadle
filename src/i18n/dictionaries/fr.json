@@ -27,6 +27,10 @@
     "anime": "Anime :",
     "loading": "Tirage d’un personnage…",
     "error": "Impossible de tirer un personnage.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "hints": "Indices",
+    "hintAnime": "Révéler l’anime",
+    "hintInitials": "Révéler les initiales",
+    "initials": "Initiales :"
   }
 }

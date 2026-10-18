@@ -2,6 +2,7 @@
 
 import { drawCharacter } from "@/game/draw";
 import { isCorrectGuess, type CharacterNames } from "@/game/guess";
+import { initials, type HintKind } from "@/game/hint";
 import { openTicket, sealTicket } from "@/game/ticket";
 import { malSource } from "@/mal/source";
 
@@ -56,4 +57,11 @@ export async function submitGuess(ticket: string, guess: string): Promise<GuessR
 
 export async function giveUp(ticket: string): Promise<Reveal> {
   return open(ticket).reveal;
+}
+
+export async function revealHint(ticket: string, kind: HintKind): Promise<string> {
+  const { reveal } = open(ticket);
+  if (kind === "anime") return reveal.anime;
+  if (kind === "initials") return initials(reveal.character);
+  throw new Error("Unknown hint");
 }

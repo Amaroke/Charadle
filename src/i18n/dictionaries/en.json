@@ -27,6 +27,10 @@
     "anime": "Anime:",
     "loading": "Drawing a character…",
     "error": "Could not draw a character.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "hints": "Hints",
+    "hintAnime": "Reveal the anime",
+    "hintInitials": "Reveal the initials",
+    "initials": "Initials:"
   }
 }

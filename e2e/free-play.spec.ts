@@ -41,6 +41,29 @@ test("giving up reveals the character and the anime", async ({ page }) => {
   await expect(page.getByText("One Piece")).toBeVisible();
 });
 
+test("each hint is used once and the hints are disabled once the game is over", async ({ page }) => {
+  const responses = await startFreePlay(page);
+  const animeHint = page.getByRole("button", { name: "Reveal the anime" });
+  const initialsHint = page.getByRole("button", { name: "Reveal the initials" });
+
+  await initialsHint.click();
+  await expect(page.getByText("L. M. D.")).toBeVisible();
+  await expect(initialsHint).toBeHidden();
+  expect(responses.join("\n")).not.toMatch(/luffy|monkey|one piece/i);
+
+  await animeHint.click();
+  await expect(page.getByText("One Piece")).toBeVisible();
+  await expect(animeHint).toBeHidden();
+
+  await page.getByRole("button", { name: "Give up" }).click();
+  await expect(page.getByText("Too bad!")).toBeVisible();
+  await page.getByRole("button", { name: "Next character" }).click();
+  await expect(page.getByRole("button", { name: "Reveal the anime" })).toBeEnabled();
+  await page.getByRole("button", { name: "Give up" }).click();
+  await expect(page.getByRole("button", { name: "Reveal the anime" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Reveal the initials" })).toBeDisabled();
+});
+
 test("free play speaks French on the French route", async ({ page }) => {
   await page.goto("/fr/play");
   await expect(page.getByRole("img", { name: "Personnage à deviner" })).toBeVisible();
