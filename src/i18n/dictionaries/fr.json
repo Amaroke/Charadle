@@ -1,0 +1,13 @@
+{
+  "home": {
+    "logoAlt": "Logo de Charadle",
+    "tagline": "Devine le personnage d'anime à partir de son image."
+  },
+  "languageSwitcher": {
+    "label": "Langue"
+  },
+  "languages": {
+    "en": "English",
+    "fr": "Français"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "home": {
+    "logoAlt": "Charadle logo",
+    "tagline": "Guess the anime character from their picture."
+  },
+  "languageSwitcher": {
+    "label": "Language"
+  },
+  "languages": {
+    "en": "English",
+    "fr": "Français"
+  }
+}
