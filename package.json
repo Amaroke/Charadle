@@ -17,6 +17,8 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "next": "16.4.2",
     "react": "19.3.0",
     "react-dom": "19.3.0"
