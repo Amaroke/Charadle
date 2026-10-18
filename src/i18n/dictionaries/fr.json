@@ -2,7 +2,7 @@
   "home": {
     "logoAlt": "Logo de Charadle",
     "tagline": "Devine le personnage d'anime à partir de son image.",
-    "play": "Free play"
+    "play": "Mode libre"
   },
   "languageSwitcher": {
     "label": "Langue"
@@ -12,7 +12,7 @@
     "fr": "Français"
   },
   "freePlay": {
-    "title": "Free play",
+    "title": "Mode libre",
     "pictureAlt": "Personnage à deviner",
     "guessLabel": "Nom du personnage",
     "guessPlaceholder": "Prénom, nom ou alias",
