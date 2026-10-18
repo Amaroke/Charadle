@@ -5,6 +5,8 @@ import { openPuzzle, type Reveal } from "@/game/puzzle";
 
 export type GuessResult = { correct: false } | { correct: true; reveal: Reveal };
 
+export type ChoiceResult = { correct: boolean; reveal: Reveal };
+
 const maxGuessLength = 100;
 
 export async function submitGuess(ticket: string, guess: string): Promise<GuessResult> {
@@ -15,4 +17,13 @@ export async function submitGuess(ticket: string, guess: string): Promise<GuessR
 
 export async function giveUp(ticket: string): Promise<Reveal> {
   return openPuzzle(ticket).reveal;
+}
+
+export async function multipleChoice(ticket: string): Promise<string[]> {
+  return openPuzzle(ticket).choices;
+}
+
+export async function pickChoice(ticket: string, choice: string): Promise<ChoiceResult> {
+  const { reveal } = openPuzzle(ticket);
+  return { correct: choice === reveal.character, reveal };
 }

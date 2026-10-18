@@ -32,6 +32,8 @@
     "hintAnime": "Révéler l’anime",
     "hintInitials": "Révéler les initiales",
     "initials": "Initiales :",
+    "hintChoices": "Choix multiple",
+    "choices": "Choisis le personnage",
     "settings": "Réglages",
     "settingsIntro": "Choisis d’où viennent les personnages, puis lance la partie.",
     "pool": "Pool d’animes",

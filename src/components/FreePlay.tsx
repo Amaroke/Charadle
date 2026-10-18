@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
-import { giveUp, submitGuess } from "@/game/actions";
+import { giveUp, multipleChoice, pickChoice, submitGuess } from "@/game/actions";
 import { PoolError, poolProblems, type PoolProblem } from "@/game/draw";
 import type { HintKind } from "@/game/hint";
 import type { Puzzle, Reveal } from "@/game/puzzle";
@@ -33,6 +33,7 @@ const problemLabels = {
 } as const satisfies Record<PoolProblem, keyof Dictionary["freePlay"]>;
 
 const oneYear = 60 * 60 * 24 * 365;
+const missesBeforeChoices = 3;
 
 function remember(settings: Settings) {
   document.cookie = `${settingsCookie}=${settingsParams(settings)}; max-age=${oneYear}; path=/; samesite=lax`;
@@ -75,6 +76,8 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initi
   const [settings, setSettings] = useState<Settings | undefined>(initialSettings);
   const [guess, setGuess] = useState("");
   const [usedHints, setUsedHints] = useState<HintKind[]>([]);
+  const [misses, setMisses] = useState(0);
+  const [choices, setChoices] = useState<string[] | undefined>();
   const [pending, startTransition] = useTransition();
   const upcoming = useRef<{ settings: Settings; draw: Promise<Puzzle> } | null>(null);
   const game = state.status === "settings" ? state.previous : state;
@@ -96,6 +99,8 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initi
         const puzzle = await draw;
         setGuess("");
         setUsedHints([]);
+        setMisses(0);
+        setChoices(undefined);
         remember(chosen);
         setSettings(chosen);
         setState({ status: "playing", puzzle });
@@ -156,7 +161,10 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initi
       try {
         const result = await submitGuess(puzzle.ticket, guess);
         if (result.correct) setState({ status: "over", puzzle, won: true, reveal: result.reveal });
-        else setState({ status: "playing", puzzle, feedback: "wrong" });
+        else {
+          setMisses((count) => count + 1);
+          setState({ status: "playing", puzzle, feedback: "wrong" });
+        }
       } catch {
         setState({ status: "playing", puzzle, feedback: "failed" });
       }
@@ -172,6 +180,54 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initi
       }
     });
   }
+
+  function revealChoices() {
+    startTransition(async () => {
+      try {
+        setChoices(await multipleChoice(puzzle.ticket));
+      } catch {
+        setState({ status: "playing", puzzle, feedback: "failed" });
+      }
+    });
+  }
+
+  function choose(choice: string) {
+    startTransition(async () => {
+      try {
+        const result = await pickChoice(puzzle.ticket, choice);
+        setState({ status: "over", puzzle, won: result.correct, reveal: result.reveal });
+      } catch {
+        setState({ status: "playing", puzzle, feedback: "failed" });
+      }
+    });
+  }
+
+  const choiceSection = choices ? (
+    <section aria-label={labels.choices} className="grid w-full grid-cols-2 gap-2">
+      {choices.map((choice) => (
+        <button
+          key={choice}
+          type="button"
+          onClick={() => choose(choice)}
+          disabled={pending || state.status !== "playing"}
+          className="rounded border border-sakura px-3 py-2 text-sm hover:bg-sakura hover:text-ink disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-inherit"
+        >
+          {choice}
+        </button>
+      ))}
+    </section>
+  ) : (
+    misses >= missesBeforeChoices && (
+      <button
+        type="button"
+        onClick={revealChoices}
+        disabled={pending || state.status !== "playing"}
+        className="rounded border border-sakura px-3 py-1 text-sm text-sakura hover:bg-sakura hover:text-ink disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-sakura"
+      >
+        {labels.hintChoices}
+      </button>
+    )
+  );
 
   const hintRows: { kind: HintKind; label: string; button: string }[] = [
     { kind: "anime", label: labels.anime, button: labels.hintAnime },
@@ -198,6 +254,7 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initi
           </button>
         ),
       )}
+      {choiceSection}
     </section>
   );
 

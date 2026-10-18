@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { drawCharacter, PoolError, type AnimeSource, type Character, type ListedAnime } from "@/game/draw";
+import { drawCharacter, drawChoices, PoolError, type AnimeSource, type Character, type DrawnCharacter, type ListedAnime } from "@/game/draw";
 import type { Settings } from "@/game/settings";
 
 function character(id: number, overrides: Partial<Character> = {}): Character {
@@ -183,5 +183,103 @@ describe("drawCharacter from a MAL list", () => {
     const source = fakeSource(catalog, list);
     const drawing = drawCharacter(source, { pool: { username: "luffy", statuses: ["completed"], minScore: 10 }, difficulty: "normal" });
     await expect(drawing).rejects.toEqual(new PoolError("empty-pool"));
+  });
+});
+
+describe("drawChoices", () => {
+  const normal: Settings = { pool: 100, difficulty: "normal" };
+
+  function drawnFrom(animeId: number, drawnCharacter: Character): DrawnCharacter {
+    return { anime: { id: animeId, title: `Anime ${animeId}` }, character: { ...drawnCharacter, picture: "https://cdn.example/x.jpg" } };
+  }
+
+  it("offers four Characters of the same Anime including the drawn one", async () => {
+    const characters = [character(10), character(11), character(12), character(13), character(14)];
+    const source = fakeSource({ 1: characters, 2: [character(20)] });
+    const choices = await drawChoices(source, normal, drawnFrom(1, characters[0]));
+    expect(choices).toHaveLength(4);
+    expect(choices).toContain("First10 Last10");
+    expect(choices.every((name) => /^First1\d Last1\d$/.test(name))).toBe(true);
+    expect(new Set(choices).size).toBe(4);
+  });
+
+  it("prefers main characters of the same Anime in Normal", async () => {
+    const characters = [
+      character(10),
+      character(11, { role: "supporting" }),
+      character(12),
+      character(13),
+      character(14),
+    ];
+    const source = fakeSource({ 1: characters });
+    const choices = await drawChoices(source, normal, drawnFrom(1, characters[0]));
+    expect(choices).not.toContain("First11 Last11");
+  });
+
+  it("completes with other characters of the same Anime before other Anime", async () => {
+    const characters = [character(10), character(11, { role: "supporting" }), character(12, { picture: undefined })];
+    const source = fakeSource({ 1: characters, 2: [character(20), character(21)] });
+    const choices = await drawChoices(source, normal, drawnFrom(1, characters[0]), sequence(0));
+    expect(choices).toHaveLength(4);
+    expect(choices).toEqual(expect.arrayContaining(["First10 Last10", "First11 Last11", "First12 Last12"]));
+    expect(choices.filter((name) => name.startsWith("First2"))).toHaveLength(1);
+  });
+
+  it("completes with Characters of other Anime of the pool", async () => {
+    const characters = [character(10)];
+    const source = fakeSource({ 1: characters, 2: [character(20)], 3: [character(30), character(31)] });
+    const choices = await drawChoices(source, normal, drawnFrom(1, characters[0]));
+    expect(choices).toHaveLength(4);
+    expect(choices).toContain("First10 Last10");
+  });
+
+  it("completes from the MAL list when the pool is a MAL list", async () => {
+    const characters = [character(10)];
+    const list: ListedAnime[] = [
+      { id: 1, title: "Anime 1", status: "completed", score: 8 },
+      { id: 2, title: "Anime 2", status: "completed", score: 8 },
+    ];
+    const source = fakeSource({ 1: characters, 2: [character(20), character(21), character(22)], 3: [character(30)] }, list);
+    const choices = await drawChoices(
+      source,
+      { pool: { username: "luffy", statuses: ["completed"], minScore: 0 }, difficulty: "normal" },
+      drawnFrom(1, characters[0]),
+    );
+    expect([...choices].sort()).toEqual(["First10 Last10", "First20 Last20", "First21 Last21", "First22 Last22"]);
+  });
+
+  it("never offers the same name twice", async () => {
+    const characters = [character(10), character(11, { firstName: "First10", lastName: "Last10" }), character(12)];
+    const source = fakeSource({ 1: characters });
+    const choices = await drawChoices(source, normal, drawnFrom(1, characters[0]));
+    expect([...choices].sort()).toEqual(["First10 Last10", "First12 Last12"]);
+  });
+
+  it("never offers a name that would be accepted as the drawn Character", async () => {
+    const characters = [character(10), character(11, { firstName: "first10", lastName: "LÄST10" }), character(12)];
+    const source = fakeSource({ 1: characters });
+    const choices = await drawChoices(source, normal, drawnFrom(1, characters[0]));
+    expect([...choices].sort()).toEqual(["First10 Last10", "First12 Last12"]);
+  });
+
+  it("keeps the choices it has when the Anime pool cannot be fetched", async () => {
+    const characters = [character(10), character(11)];
+    const source = fakeSource({ 1: characters });
+    source.topAnime = async () => {
+      throw new Error("MAL is down");
+    };
+    const choices = await drawChoices(source, normal, drawnFrom(1, characters[0]));
+    expect([...choices].sort()).toEqual(["First10 Last10", "First11 Last11"]);
+  });
+
+  it("does not always put the drawn Character at the same place", async () => {
+    const characters = [character(10), character(11), character(12), character(13)];
+    const source = fakeSource({ 1: characters });
+    const places = new Set<number>();
+    for (const value of [0, 0.3, 0.6, 0.99]) {
+      const choices = await drawChoices(source, normal, drawnFrom(1, characters[0]), () => value);
+      places.add(choices.indexOf("First10 Last10"));
+    }
+    expect(places.size).toBeGreaterThan(1);
   });
 });
