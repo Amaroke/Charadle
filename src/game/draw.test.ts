@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { drawCharacter, type AnimeSource, type Character } from "@/game/draw";
+import { drawCharacter, PoolError, type AnimeSource, type Character, type ListedAnime } from "@/game/draw";
 import type { Settings } from "@/game/settings";
 
 function character(id: number, overrides: Partial<Character> = {}): Character {
@@ -14,10 +14,19 @@ function character(id: number, overrides: Partial<Character> = {}): Character {
   };
 }
 
-function fakeSource(catalog: Record<number, Character[]>): AnimeSource & { requestedLimits: number[] } {
+function fakeSource(
+  catalog: Record<number, Character[]>,
+  list: ListedAnime[] = [],
+): AnimeSource & { requestedLimits: number[]; requestedUsers: string[] } {
   const requestedLimits: number[] = [];
+  const requestedUsers: string[] = [];
   return {
     requestedLimits,
+    requestedUsers,
+    async malList(username) {
+      requestedUsers.push(username);
+      return list;
+    },
     async topAnime(limit) {
       requestedLimits.push(limit);
       return Object.keys(catalog).map((id) => ({ id: Number(id), title: `Anime ${id}` }));
@@ -95,6 +104,9 @@ describe("drawCharacter", () => {
       async topAnime() {
         return top;
       },
+      async malList() {
+        return [];
+      },
       async characters(animeId) {
         return animeId === 2 ? [character(20)] : [];
       },
@@ -106,5 +118,70 @@ describe("drawCharacter", () => {
   it("fails when no anime has an eligible character", async () => {
     const source = fakeSource({ 1: [], 2: [character(20, { role: "supporting" })] });
     await expect(drawCharacter(source, normal)).rejects.toThrow();
+  });
+});
+
+describe("drawCharacter from a MAL list", () => {
+  function listed(id: number, status: ListedAnime["status"], score: number): ListedAnime {
+    return { id, title: `Anime ${id}`, status, score };
+  }
+
+  const catalog = { 1: [character(10)], 2: [character(20)], 3: [character(30)], 4: [character(40, { role: "supporting" })] };
+  const list = [listed(1, "completed", 9), listed(2, "watching", 6), listed(3, "completed", 0), listed(4, "dropped", 3)];
+
+  it("draws from the MAL list of the username", async () => {
+    const source = fakeSource(catalog, list);
+    await drawCharacter(source, { pool: { username: "luffy", statuses: ["completed"], minScore: 0 }, difficulty: "normal" });
+    expect(source.requestedUsers).toEqual(["luffy"]);
+    expect(source.requestedLimits).toEqual([]);
+  });
+
+  it("draws only anime with a chosen watch status", async () => {
+    const source = fakeSource(catalog, list);
+    const drawn = await drawCharacter(
+      source,
+      { pool: { username: "luffy", statuses: ["watching"], minScore: 0 }, difficulty: "normal" },
+      sequence(0.99, 0),
+    );
+    expect(drawn.anime).toEqual({ id: 2, title: "Anime 2" });
+  });
+
+  it("draws only anime rated at least the minimum rating", async () => {
+    const source = fakeSource(catalog, list);
+    const drawn = await drawCharacter(
+      source,
+      { pool: { username: "luffy", statuses: ["completed", "watching"], minScore: 7 }, difficulty: "normal" },
+      sequence(0.99, 0),
+    );
+    expect(drawn.anime.id).toBe(1);
+  });
+
+  it("keeps unrated anime when there is no minimum rating", async () => {
+    const source = fakeSource(catalog, list);
+    const drawn = await drawCharacter(
+      source,
+      { pool: { username: "luffy", statuses: ["completed"], minScore: 0 }, difficulty: "normal" },
+      sequence(0.99, 0),
+    );
+    expect(drawn.anime.id).toBe(3);
+  });
+
+  it("applies the Difficulty to the MAL list", async () => {
+    const pool = { username: "luffy", statuses: ["dropped" as const], minScore: 0 };
+    await expect(drawCharacter(fakeSource(catalog, list), { pool, difficulty: "normal" })).rejects.toThrow();
+    const drawn = await drawCharacter(fakeSource(catalog, list), { pool, difficulty: "expert" }, sequence(0, 0));
+    expect(drawn.character.id).toBe(40);
+  });
+
+  it("fails with an empty pool when no anime of the MAL list has an eligible character", async () => {
+    const source = fakeSource(catalog, list);
+    const drawing = drawCharacter(source, { pool: { username: "luffy", statuses: ["dropped"], minScore: 0 }, difficulty: "normal" });
+    await expect(drawing).rejects.toEqual(new PoolError("empty-pool"));
+  });
+
+  it("fails with an empty pool when the filters leave no anime", async () => {
+    const source = fakeSource(catalog, list);
+    const drawing = drawCharacter(source, { pool: { username: "luffy", statuses: ["completed"], minScore: 10 }, difficulty: "normal" });
+    await expect(drawing).rejects.toEqual(new PoolError("empty-pool"));
   });
 });

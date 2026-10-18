@@ -167,3 +167,51 @@ test("the settings can be opened during a game and left without losing it", asyn
   await page.getByRole("button", { name: "Cancel" }).click();
   await expect(page.getByText("L. M. D.")).toBeVisible();
 });
+
+async function chooseMalList(page: Page, username: string, minScore?: string) {
+  await page.goto("/en/play");
+  await page.getByText("MAL list", { exact: true }).click();
+  await page.getByRole("textbox", { name: "MyAnimeList username" }).fill(username);
+  if (minScore) await page.getByRole("combobox", { name: "Minimum rating" }).selectOption(minScore);
+  await page.getByRole("button", { name: "Play" }).click();
+}
+
+test("a Guest plays on the MAL list of a username", async ({ page }) => {
+  const draws: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().includes("/api/puzzle")) draws.push(request.url());
+  });
+  await page.goto("/en/play");
+  await page.getByText("MAL list", { exact: true }).click();
+  await expect(page.getByRole("checkbox", { name: "Completed" })).toBeChecked();
+  await expect(page.getByRole("checkbox", { name: "Plan to Watch" })).not.toBeChecked();
+  await page.getByRole("textbox", { name: "MyAnimeList username" }).fill("LuffyFan");
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeVisible();
+  expect(draws[0]).toContain("pool=mal&user=LuffyFan&status=completed&score=0");
+
+  await page.getByRole("button", { name: "Give up" }).click();
+  await expect(page.getByText("One Piece")).toBeVisible();
+
+  await page.reload();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByRole("radio", { name: "MAL list" })).toBeChecked();
+  await expect(page.getByRole("textbox", { name: "MyAnimeList username" })).toHaveValue("LuffyFan");
+});
+
+test("a username that does not exist is told clearly", async ({ page }) => {
+  await chooseMalList(page, "nobody");
+  await expect(page.getByText("No MyAnimeList user has this username.")).toBeVisible();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByRole("textbox", { name: "MyAnimeList username" })).toHaveValue("nobody");
+});
+
+test("a private MAL list is told clearly", async ({ page }) => {
+  await chooseMalList(page, "secretive");
+  await expect(page.getByText("This MAL list is private.")).toBeVisible();
+});
+
+test("filters that leave no anime are told clearly", async ({ page }) => {
+  await chooseMalList(page, "luffyfan", "10");
+  await expect(page.getByText("No anime of this MAL list matches the filters.")).toBeVisible();
+});

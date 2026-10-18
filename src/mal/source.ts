@@ -1,5 +1,5 @@
 import { cacheLife } from "next/cache";
-import type { Anime, AnimeSource, Character } from "@/game/draw";
+import { PoolError, type Anime, type AnimeSource, type Character, type ListedAnime, type PoolProblem } from "@/game/draw";
 import { tiers } from "@/game/settings";
 import { malClient } from "@/mal/client";
 
@@ -21,10 +21,29 @@ async function topAnime(limit: number): Promise<Anime[]> {
   return (await largestTop()).slice(0, limit);
 }
 
+async function cachedMalList(username: string): Promise<{ listed: ListedAnime[] } | { problem: PoolProblem }> {
+  "use cache";
+  try {
+    const listed = await client().malList(username);
+    cacheLife("minutes");
+    return { listed };
+  } catch (error) {
+    if (!(error instanceof PoolError)) throw error;
+    cacheLife("seconds");
+    return { problem: error.problem };
+  }
+}
+
+async function malList(username: string): Promise<ListedAnime[]> {
+  const result = await cachedMalList(username.toLowerCase());
+  if ("problem" in result) throw new PoolError(result.problem);
+  return result.listed;
+}
+
 async function characters(animeId: number): Promise<Character[]> {
   "use cache";
   cacheLife("days");
   return client().characters(animeId);
 }
 
-export const malSource: AnimeSource = { topAnime, characters };
+export const malSource: AnimeSource = { topAnime, malList, characters };

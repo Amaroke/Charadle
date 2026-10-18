@@ -42,6 +42,20 @@
     "expert": "Expert",
     "expertHint": "Any character",
     "play": "Play",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "malList": "MAL list",
+    "malListHint": "Play on the anime list of a MyAnimeList user",
+    "username": "MyAnimeList username",
+    "statuses": "Watch status",
+    "completed": "Completed",
+    "watching": "Watching",
+    "on_hold": "On-Hold",
+    "dropped": "Dropped",
+    "plan_to_watch": "Plan to Watch",
+    "minScore": "Minimum rating",
+    "anyScore": "Any",
+    "unknownUser": "No MyAnimeList user has this username.",
+    "privateList": "This MAL list is private.",
+    "emptyPool": "No anime of this MAL list matches the filters."
   }
 }

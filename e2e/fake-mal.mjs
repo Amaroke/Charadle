@@ -28,6 +28,16 @@ const characters = {
   ],
 };
 
+const animeLists = {
+  luffyfan: {
+    data: [
+      { node: { id: 21, title: "Wan Pīsu", alternative_titles: { en: "One Piece" } }, list_status: { status: "completed", score: 9 } },
+      { node: { id: 22, title: "Plan Only", alternative_titles: {} }, list_status: { status: "plan_to_watch", score: 0 } },
+    ],
+    paging: {},
+  },
+};
+
 const frenchTitles = { 21: "One Piece (VF)" };
 
 function sparql(query) {
@@ -54,6 +64,12 @@ createServer((request, response) => {
   }
   if (pathname === "/v2/anime/ranking") return json(response, ranking);
   if (pathname === "/v2/anime/21/characters") return json(response, characters);
+  const listOwner = pathname.match(/^\/v2\/users\/([^/]+)\/animelist$/)?.[1]?.toLowerCase();
+  if (listOwner === "secretive") {
+    response.writeHead(403, { "content-type": "application/json" });
+    return response.end(JSON.stringify({ error: "forbidden" }));
+  }
+  if (listOwner && animeLists[listOwner]) return json(response, animeLists[listOwner]);
   response.writeHead(404);
   response.end();
 }).listen(port);

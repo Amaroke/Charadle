@@ -42,6 +42,20 @@
     "expert": "Expert",
     "expertHint": "Tous les personnages",
     "play": "Jouer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "malList": "MAL list",
+    "malListHint": "Joue sur la liste d’animes d’un utilisateur MyAnimeList",
+    "username": "Pseudo MyAnimeList",
+    "statuses": "Statut",
+    "completed": "Terminé",
+    "watching": "En cours",
+    "on_hold": "En pause",
+    "dropped": "Abandonné",
+    "plan_to_watch": "À voir",
+    "minScore": "Note minimale",
+    "anyScore": "Toutes",
+    "unknownUser": "Aucun utilisateur MyAnimeList n’a ce pseudo.",
+    "privateList": "Cette MAL list est privée.",
+    "emptyPool": "Aucun anime de cette MAL list ne correspond aux filtres."
   }
 }

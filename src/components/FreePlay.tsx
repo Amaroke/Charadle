@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, useTransition, type FormEvent } from "react";
 import { giveUp, submitGuess } from "@/game/actions";
+import { PoolError, poolProblems, type PoolProblem } from "@/game/draw";
 import type { HintKind } from "@/game/hint";
 import type { Puzzle, Reveal } from "@/game/puzzle";
 import { defaultSettings, settingsCookie, settingsParams, type Settings } from "@/game/settings";
@@ -15,14 +16,21 @@ type FreePlayProps = {
   locale: Locale;
   initialSettings?: Settings;
   initialPuzzle?: Puzzle;
+  initialProblem?: PoolProblem;
 };
 
 type Game =
-  | { status: "error"; attempted: Settings }
+  | { status: "error"; attempted: Settings; problem?: PoolProblem }
   | { status: "playing"; puzzle: Puzzle; feedback?: "wrong" | "failed" }
   | { status: "over"; puzzle: Puzzle; won: boolean; reveal: Reveal };
 
 type State = Game | { status: "settings"; previous?: Game };
+
+const problemLabels = {
+  "unknown-user": "unknownUser",
+  "private-list": "privateList",
+  "empty-pool": "emptyPool",
+} as const satisfies Record<PoolProblem, keyof Dictionary["freePlay"]>;
 
 const oneYear = 60 * 60 * 24 * 365;
 
@@ -43,6 +51,10 @@ async function drawWithPicture(locale: Locale, settings: Settings): Promise<Puzz
   const params = settingsParams(settings);
   params.set("locale", locale);
   const response = await fetch(`/api/puzzle?${params}`, { cache: "no-store" });
+  if (response.status === 422) {
+    const { problem } = (await response.json()) as { problem?: PoolProblem };
+    if (problem && poolProblems.includes(problem)) throw new PoolError(problem);
+  }
   if (!response.ok) throw new Error(`Puzzle draw answered ${response.status}`);
   const puzzle = (await response.json()) as Puzzle;
   await preloadPicture(puzzle.picture);
@@ -53,13 +65,13 @@ function sameSettings(a: Settings, b: Settings): boolean {
   return settingsParams(a).toString() === settingsParams(b).toString();
 }
 
-function initialState(settings?: Settings, puzzle?: Puzzle): State {
+function initialState(settings?: Settings, puzzle?: Puzzle, problem?: PoolProblem): State {
   if (!settings) return { status: "settings" };
-  return puzzle ? { status: "playing", puzzle } : { status: "error", attempted: settings };
+  return puzzle ? { status: "playing", puzzle } : { status: "error", attempted: settings, problem };
 }
 
-export function FreePlay({ labels, locale, initialSettings, initialPuzzle }: FreePlayProps) {
-  const [state, setState] = useState<State>(() => initialState(initialSettings, initialPuzzle));
+export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initialProblem }: FreePlayProps) {
+  const [state, setState] = useState<State>(() => initialState(initialSettings, initialPuzzle, initialProblem));
   const [settings, setSettings] = useState<Settings | undefined>(initialSettings);
   const [guess, setGuess] = useState("");
   const [usedHints, setUsedHints] = useState<HintKind[]>([]);
@@ -87,8 +99,8 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle }: Fre
         remember(chosen);
         setSettings(chosen);
         setState({ status: "playing", puzzle });
-      } catch {
-        setState({ status: "error", attempted: chosen });
+      } catch (error) {
+        setState({ status: "error", attempted: chosen, problem: error instanceof PoolError ? error.problem : undefined });
       }
     });
   }
@@ -113,7 +125,7 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle }: Fre
     return (
       <FreePlaySettings
         labels={labels}
-        settings={settings ?? defaultSettings}
+        settings={previous?.status === "error" ? previous.attempted : (settings ?? defaultSettings)}
         pending={pending}
         onPlay={play}
         onCancel={previous && (() => setState(previous))}
@@ -124,10 +136,12 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle }: Fre
   if (state.status === "error") {
     return (
       <div className="flex flex-col items-center gap-3">
-        <p role="alert">{labels.error}</p>
-        <button type="button" onClick={() => play(state.attempted)} disabled={pending} className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
-          {labels.retry}
-        </button>
+        <p role="alert">{state.problem ? labels[problemLabels[state.problem]] : labels.error}</p>
+        {!state.problem && (
+          <button type="button" onClick={() => play(state.attempted)} disabled={pending} className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
+            {labels.retry}
+          </button>
+        )}
         {settingsButton}
       </div>
     );
