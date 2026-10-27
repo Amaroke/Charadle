@@ -49,9 +49,10 @@ function preloadPicture(src: string): Promise<void> {
   });
 }
 
-async function drawWithPicture(locale: Locale, settings: Settings): Promise<Puzzle> {
+async function drawWithPicture(locale: Locale, settings: Settings, after?: string): Promise<Puzzle> {
   const params = settingsParams(settings);
   params.set("locale", locale);
+  if (after) params.set("after", after);
   const response = await fetch(`/api/puzzle?${params}`, { cache: "no-store" });
   if (response.status === 422) {
     const { problem } = (await response.json()) as { problem?: PoolProblem };
@@ -87,14 +88,14 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initi
 
   useEffect(() => {
     if (!ticket || !settings) return;
-    const draw = drawWithPicture(locale, settings);
+    const draw = drawWithPicture(locale, settings, ticket);
     draw.catch(() => {});
     upcoming.current = { settings, draw };
   }, [ticket, locale, settings]);
 
   function play(chosen: Settings) {
     const preloaded = upcoming.current && sameSettings(upcoming.current.settings, chosen) ? upcoming.current : null;
-    const draw = preloaded?.draw ?? drawWithPicture(locale, chosen);
+    const draw = preloaded?.draw ?? drawWithPicture(locale, chosen, ticket);
     upcoming.current = null;
     startTransition(async () => {
       try {

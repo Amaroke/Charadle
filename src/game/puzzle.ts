@@ -1,4 +1,4 @@
-import { drawCharacter, drawChoices, fullName } from "@/game/draw";
+import { drawCharacter, drawChoices, fullName, nextHistory, type DrawHistory } from "@/game/draw";
 import type { CharacterNames } from "@/game/guess";
 import { initials, type HintKind } from "@/game/hint";
 import type { Settings } from "@/game/settings";
@@ -23,6 +23,7 @@ type SealedPuzzle = {
   names: CharacterNames;
   reveal: Reveal;
   choices: string[];
+  history?: DrawHistory;
 };
 
 export function openPuzzle(ticket: unknown): SealedPuzzle {
@@ -31,8 +32,17 @@ export function openPuzzle(ticket: unknown): SealedPuzzle {
   return puzzle;
 }
 
-export async function drawPuzzle(locale: string | null | undefined, settings: Settings): Promise<Puzzle> {
-  const drawn = await drawCharacter(malSource, settings);
+function historyAfter(ticket: string | null | undefined): DrawHistory | undefined {
+  return ticket ? openTicket<SealedPuzzle>(ticket, gameSecret())?.history : undefined;
+}
+
+export async function drawPuzzle(
+  locale: string | null | undefined,
+  settings: Settings,
+  previousTicket?: string | null,
+): Promise<Puzzle> {
+  const history = historyAfter(previousTicket) ?? { characters: [] };
+  const drawn = await drawCharacter(malSource, settings, Math.random, history);
   const { anime, character } = drawn;
   const [animeTitle, choices] = await Promise.all([
     localizedTitle(anime, locale && hasLocale(locale) ? locale : defaultLocale, frenchTitle),
@@ -46,6 +56,7 @@ export async function drawPuzzle(locale: string | null | undefined, settings: Se
     names: { firstName: character.firstName, lastName: character.lastName, aliases: character.aliases },
     reveal,
     choices,
+    history: nextHistory(history, drawn),
   };
   return {
     ticket: sealTicket(sealed, gameSecret()),

@@ -1,5 +1,6 @@
 import { isCorrectGuess, type CharacterNames } from "@/game/guess";
 import { isMalList, type AnimePool, type Difficulty, type Settings, type Tier, type WatchStatus } from "@/game/settings";
+import { franchiseKey } from "@/game/title";
 
 export type Anime = {
   id: number;
@@ -29,6 +30,11 @@ export type DrawnCharacter = {
   character: Character & { picture: string };
 };
 
+export type DrawHistory = {
+  characters: number[];
+  franchise?: string;
+};
+
 export const poolProblems = ["unknown-user", "private-list", "empty-pool"] as const;
 
 export type PoolProblem = (typeof poolProblems)[number];
@@ -42,13 +48,14 @@ export class PoolError extends Error {
 
 const maxAttempts = 5;
 const choiceCount = 4;
+const historyLength = 100;
 
 function randomIndex(length: number, random: () => number): number {
   return Math.min(Math.floor(random() * length), length - 1);
 }
 
 function pick<T>(items: T[], random: () => number): T {
-  return items[randomIndex(items.length, random)];
+  return items.length === 1 ? items[0] : items[randomIndex(items.length, random)];
 }
 
 function shuffled<T>(items: T[], random: () => number): T[] {
@@ -85,18 +92,32 @@ async function animePool(source: AnimeSource, pool: AnimePool): Promise<Anime[]>
   return kept;
 }
 
+function byFranchise(pool: Anime[]): Anime[][] {
+  const franchises = new Map<string, Anime[]>();
+  for (const anime of pool) {
+    const key = franchiseKey(anime.title);
+    franchises.set(key, [...(franchises.get(key) ?? []), anime]);
+  }
+  return [...franchises.values()];
+}
+
 async function drawFrom(
   source: AnimeSource,
-  remaining: Anime[],
+  franchises: Anime[][],
   difficulty: Difficulty,
   random: () => number,
+  excluded: ReadonlySet<number> = new Set(),
 ): Promise<DrawnCharacter | undefined> {
-  for (let attempt = 0; attempt < maxAttempts && remaining.length > 0; attempt++) {
-    const anime = pick(remaining, random);
+  for (let attempt = 0; attempt < maxAttempts && franchises.length > 0; attempt++) {
+    const franchise = pick(franchises, random);
+    const anime = pick(franchise, random);
     const characters = await source.characters(anime.id).catch((): Character[] => []);
-    const eligible = characters.filter((character) => isEligible(character, difficulty));
+    const eligible = characters
+      .filter((character) => isEligible(character, difficulty))
+      .filter(({ id }) => !excluded.has(id));
     if (eligible.length > 0) return { anime, character: pick(eligible, random) };
-    remaining.splice(remaining.indexOf(anime), 1);
+    franchise.splice(franchise.indexOf(anime), 1);
+    if (franchise.length === 0) franchises.splice(franchises.indexOf(franchise), 1);
   }
   return undefined;
 }
@@ -105,12 +126,28 @@ export async function drawCharacter(
   source: AnimeSource,
   settings: Settings,
   random: () => number = Math.random,
+  history: DrawHistory = { characters: [] },
 ): Promise<DrawnCharacter> {
-  const remaining = await animePool(source, settings.pool);
-  const drawn = await drawFrom(source, remaining, settings.difficulty, random);
-  if (drawn) return drawn;
-  if (remaining.length === 0 && isMalList(settings.pool)) throw new PoolError("empty-pool");
+  const pool = await animePool(source, settings.pool);
+  const others = pool.filter(({ title }) => franchiseKey(title) !== history.franchise);
+  const stages = [{ pool: others.length > 0 ? others : pool, excluded: new Set(history.characters) }];
+  if (history.characters.length > 0 || history.franchise) stages.push({ pool, excluded: new Set() });
+  let exhausted = false;
+  for (const stage of stages) {
+    const franchises = byFranchise(stage.pool);
+    const drawn = await drawFrom(source, franchises, settings.difficulty, random, stage.excluded);
+    if (drawn) return drawn;
+    exhausted = franchises.length === 0;
+  }
+  if (exhausted && isMalList(settings.pool)) throw new PoolError("empty-pool");
   throw new Error("No eligible character with a picture could be drawn");
+}
+
+export function nextHistory(history: DrawHistory, { anime, character }: DrawnCharacter): DrawHistory {
+  return {
+    characters: [...history.characters, character.id].slice(-historyLength),
+    franchise: franchiseKey(anime.title),
+  };
 }
 
 export async function drawDaily(
@@ -122,7 +159,7 @@ export async function drawDaily(
   for (const tier of [...tiers].reverse()) {
     const used = new Set(drawnTiers.map(({ anime }) => anime.id));
     const remaining = (await source.topAnime(tier)).filter(({ id }) => !used.has(id));
-    const drawn = await drawFrom(source, remaining, "normal", random);
+    const drawn = await drawFrom(source, remaining.map((anime) => [anime]), "normal", random);
     if (!drawn) throw new Error(`No main character with a picture could be drawn for the Top ${tier}`);
     drawnTiers.unshift(drawn);
   }

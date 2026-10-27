@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { localizedTitle, withoutSeason } from "@/game/title";
+import { franchiseKey, localizedTitle, withoutSeason } from "@/game/title";
 
 const onePiece = { id: 21, title: "Wan Pīsu", englishTitle: "One Piece" };
 const noEnglish = { id: 22, title: "Shingeki no Kyojin" };
@@ -87,5 +87,30 @@ describe("localizedTitle without seasons", () => {
     const source = frenchTitles({});
     const anime = { id: 40028, title: "Shingeki no Kyojin: The Final Season", englishTitle: "Attack on Titan Final Season" };
     expect(await localizedTitle(anime, "en", source.frenchTitle)).toBe("Attack on Titan");
+  });
+});
+
+describe("franchiseKey", () => {
+  it("gives the seasons and parts of a work the same key", () => {
+    const keys = [
+      "Shingeki no Kyojin",
+      "Shingeki no Kyojin Season 2",
+      "Shingeki no Kyojin Season 3 Part 2",
+      "Shingeki no Kyojin: The Final Season",
+      "Shingeki no Kyojin: The Final Season Part 2",
+    ].map(franchiseKey);
+    expect(new Set(keys).size).toBe(1);
+  });
+
+  it("cuts a subtitle at the first colon", () => {
+    expect(franchiseKey("Kimetsu no Yaiba: Yuukaku-hen")).toBe(franchiseKey("Kimetsu no Yaiba"));
+  });
+
+  it("ignores case and surrounding spaces", () => {
+    expect(franchiseKey("  Death Note ")).toBe(franchiseKey("death note"));
+  });
+
+  it("keeps different works apart", () => {
+    expect(franchiseKey("Naruto")).not.toBe(franchiseKey("Death Note"));
   });
 });
