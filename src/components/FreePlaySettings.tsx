@@ -19,6 +19,7 @@ import type { Dictionary } from "@/i18n/dictionaries";
 
 type FreePlaySettingsProps = {
   labels: Dictionary["freePlay"];
+  player?: string;
   settings: Settings;
   pending: boolean;
   onPlay: (settings: Settings) => void;
@@ -30,9 +31,11 @@ const optionClass =
 
 const scores = Array.from({ length: maxScore + 1 }, (_, score) => score);
 
-export function FreePlaySettings({ labels, settings, pending, onPlay, onCancel }: FreePlaySettingsProps) {
+export function FreePlaySettings({ labels, player, settings, pending, onPlay, onCancel }: FreePlaySettingsProps) {
   const [pool, setPool] = useState<Tier | "mal">(isMalList(settings.pool) ? "mal" : settings.pool);
-  const [malList, setMalList] = useState<MalListPool>(isMalList(settings.pool) ? settings.pool : defaultMalList);
+  const [malList, setMalList] = useState<MalListPool>(
+    isMalList(settings.pool) ? settings.pool : { ...defaultMalList, username: player ?? "" },
+  );
   const [difficulty, setDifficulty] = useState<Difficulty>(settings.difficulty);
   const username = malList.username.trim();
   const playable = pool !== "mal" || (isUsername(username) && malList.statuses.length > 0);

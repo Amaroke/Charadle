@@ -15,6 +15,7 @@ import { FreePlaySettings } from "@/components/FreePlaySettings";
 type FreePlayProps = {
   labels: Dictionary["freePlay"];
   locale: Locale;
+  player?: string;
   initialSettings?: Settings;
   initialPuzzle?: Puzzle;
   initialProblem?: PoolProblem;
@@ -73,7 +74,7 @@ function initialState(settings?: Settings, puzzle?: Puzzle, problem?: PoolProble
   return puzzle ? { status: "playing", puzzle } : { status: "error", attempted: settings, problem };
 }
 
-export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initialProblem }: FreePlayProps) {
+export function FreePlay({ labels, locale, player, initialSettings, initialPuzzle, initialProblem }: FreePlayProps) {
   const [state, setState] = useState<State>(() => initialState(initialSettings, initialPuzzle, initialProblem));
   const [settings, setSettings] = useState<Settings | undefined>(initialSettings);
   const [guess, setGuess] = useState("");
@@ -137,6 +138,7 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initi
     return (
       <FreePlaySettings
         labels={labels}
+        player={player}
         settings={previous?.status === "error" ? previous.attempted : (settings ?? defaultSettings)}
         pending={pending}
         onPlay={play}

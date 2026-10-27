@@ -15,6 +15,13 @@
       "when": 1793110814741,
       "tag": "0001_guest_progress",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793124441776,
+      "tag": "0002_players",
+      "breakpoints": true
     }
   ]
 }

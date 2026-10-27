@@ -30,6 +30,10 @@ export default defineConfig({
       env: {
         MAL_API_URL: `http://localhost:${fakeMalPort}/v2`,
         MAL_CLIENT_ID: "e2e-client-id",
+        MAL_CLIENT_SECRET: "e2e-client-secret",
+        MAL_AUTH_URL: `http://localhost:${fakeMalPort}/v1/oauth2`,
+        AUTH_SECRET: "e2e-auth-secret",
+        AUTH_TRUST_HOST: "true",
         WIKIDATA_URL: `http://localhost:${fakeMalPort}/sparql`,
         GAME_SECRET: "e2e-game-secret",
         DATABASE_URL: "memory:",

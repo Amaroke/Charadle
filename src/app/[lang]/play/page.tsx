@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { playerName } from "@/auth/session";
 import { FreePlay, FreePlaySkeleton } from "@/components/FreePlay";
 import { PoolError, type PoolProblem } from "@/game/draw";
 import { drawPuzzle, type Puzzle } from "@/game/puzzle";
@@ -14,7 +15,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: `${dict.freePlay.title} · Charadle` };
 }
 
-async function firstDraw(locale: Locale, settings: Settings): Promise<{ puzzle?: Puzzle; problem?: PoolProblem }> {
+async function firstDraw(locale: Locale, settings?: Settings): Promise<{ puzzle?: Puzzle; problem?: PoolProblem }> {
+  if (!settings) return {};
   try {
     return { puzzle: await drawPuzzle(locale, settings) };
   } catch (error) {
@@ -25,8 +27,17 @@ async function firstDraw(locale: Locale, settings: Settings): Promise<{ puzzle?:
 async function FirstPuzzle({ labels, locale }: { labels: Dictionary["freePlay"]; locale: Locale }) {
   await connection();
   const settings = parseSettings(new URLSearchParams((await cookies()).get(settingsCookie)?.value));
-  const { puzzle, problem } = settings ? await firstDraw(locale, settings) : {};
-  return <FreePlay labels={labels} locale={locale} initialSettings={settings} initialPuzzle={puzzle} initialProblem={problem} />;
+  const [{ puzzle, problem }, player] = await Promise.all([firstDraw(locale, settings), playerName()]);
+  return (
+    <FreePlay
+      labels={labels}
+      locale={locale}
+      player={player}
+      initialSettings={settings}
+      initialPuzzle={puzzle}
+      initialProblem={problem}
+    />
+  );
 }
 
 export default async function FreePlayPage() {

@@ -12,6 +12,10 @@
     "en": "English",
     "fr": "Français"
   },
+  "account": {
+    "signIn": "Sign in with MAL",
+    "signOut": "Sign out"
+  },
   "freePlay": {
     "title": "Free play",
     "pictureAlt": "Character to guess",

@@ -66,6 +66,36 @@ function sparql(query) {
   return { results: { bindings: label ? [{ itemLabel: { "xml:lang": "fr", type: "literal", value: label } }] : [] } };
 }
 
+const player = { id: 42, name: "luffyfan" };
+const challenges = new Map();
+let codes = 0;
+
+function authorize(searchParams, response) {
+  if (searchParams.get("code_challenge_method") !== "plain") {
+    response.writeHead(400);
+    return response.end();
+  }
+  const code = `code-${codes++}`;
+  challenges.set(code, searchParams.get("code_challenge"));
+  const callback = new URL(searchParams.get("redirect_uri"));
+  callback.search = new URLSearchParams({ code, state: searchParams.get("state") }).toString();
+  response.writeHead(302, { location: callback.toString() });
+  response.end();
+}
+
+async function token(request, response) {
+  let body = "";
+  for await (const chunk of request) body += chunk;
+  const params = new URLSearchParams(body);
+  const challenge = challenges.get(params.get("code"));
+  challenges.delete(params.get("code"));
+  if (!challenge || params.get("code_verifier") !== challenge || params.get("client_secret") !== "e2e-client-secret") {
+    response.writeHead(400, { "content-type": "application/json" });
+    return response.end(JSON.stringify({ error: "invalid_grant" }));
+  }
+  json(response, { token_type: "Bearer", access_token: "e2e-access-token", expires_in: 3600 });
+}
+
 function json(response, body) {
   response.writeHead(200, { "content-type": "application/json" });
   response.end(JSON.stringify(body));
@@ -74,6 +104,11 @@ function json(response, body) {
 createServer((request, response) => {
   const { pathname, searchParams } = new URL(request.url, origin);
   if (pathname === "/sparql") return json(response, sparql(searchParams.get("query")));
+  if (pathname === "/v1/oauth2/authorize") return authorize(searchParams, response);
+  if (pathname === "/v1/oauth2/token" && request.method === "POST") return token(request, response);
+  if (pathname === "/v2/users/@me" && request.headers.authorization === "Bearer e2e-access-token") {
+    return json(response, player);
+  }
   if (pathname.startsWith("/characters/")) {
     response.writeHead(200, { "content-type": "image/png" });
     return response.end(picture);
