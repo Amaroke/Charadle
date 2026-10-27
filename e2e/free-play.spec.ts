@@ -256,3 +256,28 @@ test("a wrong pick in the multiple choice loses the game", async ({ page }) => {
   await expect(page.getByRole("textbox", { name: "Character name" })).toBeEmpty();
   await expect(page.getByRole("button", { name: "Multiple choice" })).toBeHidden();
 });
+
+test("Enter starts the next character once the game is over", async ({ page }) => {
+  await startFreePlay(page);
+  const guess = page.getByRole("textbox", { name: "Character name" });
+  await guess.fill("Nami");
+  await guess.press("Enter");
+  await expect(page.getByText("Not quite! Try again.")).toBeVisible();
+  await expect(guess).toBeVisible();
+
+  await guess.fill("Luffy");
+  await guess.press("Enter");
+  await expect(page.getByText("Well done!")).toBeVisible();
+
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("textbox", { name: "Character name" })).toBeEmpty();
+  await expect(page.getByText("Well done!")).toBeHidden();
+});
+
+test("Enter starts the next character after giving up with the mouse", async ({ page }) => {
+  await startFreePlay(page);
+  await page.getByRole("button", { name: "Give up" }).click();
+  await expect(page.getByText("Too bad!")).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("textbox", { name: "Character name" })).toBeEmpty();
+});
