@@ -1,9 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
+import { signedInPlayer } from "@/auth/session";
 import { database } from "@/db/client";
 import { dailyStore, ensureDaily } from "@/db/dailies";
+import { playerDailyStore } from "@/db/player-dailies";
 import { progressStore, recordGuess, recordHint, type RecordedGuess } from "@/db/progress";
-import { dailyDate, dailyTiers, startDaily, type DailyProgress } from "@/game/daily";
+import { dailyDate, dailyScore, dailyTiers, isOver, startDaily, type DailyProgress } from "@/game/daily";
 import { dailyView, type DailyView } from "@/game/daily-view";
 import { drawDaily, type DrawnCharacter } from "@/game/draw";
 import type { HintKind } from "@/game/hint";
@@ -60,7 +62,19 @@ export async function playGuess(
   date: string,
   isCorrect: (progress: DailyProgress) => boolean,
 ): Promise<RecordedGuess> {
-  return recordGuess(progressStore(await database()), await ensureGuestId(), date, isCorrect);
+  const recorded = await recordGuess(progressStore(await database()), await ensureGuestId(), date, isCorrect);
+  if (isOver(recorded.progress)) await recordPlayerDaily(date, dailyScore(recorded.progress));
+  return recorded;
+}
+
+async function recordPlayerDaily(date: string, score: number): Promise<void> {
+  const player = await signedInPlayer();
+  if (!player) return;
+  try {
+    await playerDailyStore(await database()).record(player.malId, date, score);
+  } catch (error) {
+    console.error("The Daily of a Player could not be recorded", error);
+  }
 }
 
 export async function playHint(date: string, kind: HintKind): Promise<DailyProgress> {

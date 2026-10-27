@@ -25,11 +25,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
       if (profile) {
         const { id, name } = profile as unknown as MalProfile;
         await playerStore(await database()).signIn({ malId: id, name });
+        token.malId = id;
       }
       return token;
     },
+    session({ session, token }) {
+      if (typeof token.malId === "number") session.user.id = String(token.malId);
+      return session;
+    },
   },
 }));
+
+export type SignedInPlayer = { malId: number; name: string };
+
+export async function signedInPlayer(): Promise<SignedInPlayer | undefined> {
+  await connection();
+  try {
+    const user = (await auth())?.user;
+    const malId = Number(user?.id);
+    return user?.name && Number.isInteger(malId) ? { malId, name: user.name } : undefined;
+  } catch (error) {
+    console.error("The session could not be read", error);
+    return undefined;
+  }
+}
 
 export async function playerName(): Promise<string | undefined> {
   await connection();

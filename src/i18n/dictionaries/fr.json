@@ -99,6 +99,17 @@
     "stats": "Tes stats",
     "played": "Joués",
     "wonCount": "Réussis",
-    "average": "Score moyen"
+    "average": "Score moyen",
+    "myStats": "Voir mes stats"
+  },
+  "stats": {
+    "title": "Stats",
+    "heading": "Tes stats du Daily",
+    "played": "Joués",
+    "won": "Réussis",
+    "average": "Score moyen",
+    "distribution": "Répartition des scores",
+    "empty": "Aucun Daily joué pour l'instant.",
+    "guest": "Ces stats vivent seulement dans ce navigateur. Connecte-toi avec MAL pour les garder."
   }
 }

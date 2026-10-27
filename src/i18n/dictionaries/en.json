@@ -99,6 +99,17 @@
     "stats": "Your stats",
     "played": "Played",
     "wonCount": "Won",
-    "average": "Average score"
+    "average": "Average score",
+    "myStats": "See my stats"
+  },
+  "stats": {
+    "title": "Stats",
+    "heading": "Your Daily stats",
+    "played": "Played",
+    "won": "Won",
+    "average": "Average score",
+    "distribution": "Score distribution",
+    "empty": "No Daily played yet.",
+    "guest": "These stats live only in this browser. Sign in with MAL to keep them."
   }
 }
