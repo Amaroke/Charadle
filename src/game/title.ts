@@ -15,6 +15,10 @@ export function withoutSeason(title: string): string {
   return stripped.trim() || title;
 }
 
+export function franchiseKey(romajiTitle: string): string {
+  return withoutSeason(romajiTitle).split(":")[0].trim().toLowerCase();
+}
+
 export async function localizedTitle(anime: Anime, locale: Locale, frenchTitle: FrenchTitleSource): Promise<string> {
   const fallback = anime.englishTitle || anime.title;
   if (locale !== "fr") return withoutSeason(fallback);

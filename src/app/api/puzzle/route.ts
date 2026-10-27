@@ -7,7 +7,7 @@ export async function GET(request: Request): Promise<Response> {
   const settings = parseSettings(searchParams);
   if (!settings) return Response.json({ error: "Invalid settings" }, { status: 400 });
   try {
-    const puzzle = await drawPuzzle(searchParams.get("locale"), settings);
+    const puzzle = await drawPuzzle(searchParams.get("locale"), settings, searchParams.get("after"));
     return Response.json(puzzle, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {
     if (!(error instanceof PoolError)) throw error;

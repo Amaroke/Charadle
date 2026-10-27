@@ -281,3 +281,17 @@ test("Enter starts the next character after giving up with the mouse", async ({ 
   await page.keyboard.press("Enter");
   await expect(page.getByRole("textbox", { name: "Character name" })).toBeEmpty();
 });
+
+test("a chain of puzzles never draws the same character twice", async ({ page }) => {
+  await page.context().addCookies([{ ...settingsCookie, value: "pool=500&difficulty=normal" }]);
+  await page.goto("/en/play");
+  const revealed: string[] = [];
+  for (let puzzle = 0; puzzle < 7; puzzle++) {
+    await page.getByRole("button", { name: "Give up" }).click();
+    const character = page.locator("[aria-live]").locator("p").nth(1).locator("span.font-bold");
+    revealed.push((await character.textContent()) ?? "");
+    await page.getByRole("button", { name: "Next character" }).click();
+    await expect(page.getByRole("button", { name: "Give up" })).toBeVisible();
+  }
+  expect(new Set(revealed).size).toBe(7);
+});
