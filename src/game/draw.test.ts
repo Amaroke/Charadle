@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { drawCharacter, drawChoices, drawDaily, PoolError, type AnimeSource, type Character, type DrawnCharacter, type ListedAnime } from "@/game/draw";
+import { drawCharacter, drawChoices, drawDaily, nextHistory, PoolError, type AnimeSource, type Character, type DrawnCharacter, type ListedAnime } from "@/game/draw";
 import { dailyTiers } from "@/game/daily";
 import type { Settings } from "@/game/settings";
 
@@ -63,7 +63,7 @@ describe("drawCharacter", () => {
 
   it("draws any character of the anime in Expert", async () => {
     const source = fakeSource({ 1: [character(10), character(11, { role: "supporting" })] });
-    const drawn = await drawCharacter(source, { pool: 100, difficulty: "expert" }, sequence(0, 0.99));
+    const drawn = await drawCharacter(source, { pool: 100, difficulty: "expert" }, sequence(0.99));
     expect(drawn.character.id).toBe(11);
   });
 
@@ -184,6 +184,103 @@ describe("drawCharacter from a MAL list", () => {
     const source = fakeSource(catalog, list);
     const drawing = drawCharacter(source, { pool: { username: "luffy", statuses: ["completed"], minScore: 10 }, difficulty: "normal" });
     await expect(drawing).rejects.toEqual(new PoolError("empty-pool"));
+  });
+});
+
+describe("drawCharacter with a history", () => {
+  const normal: Settings = { pool: 100, difficulty: "normal" };
+
+  function titledSource(titles: Record<number, string>, catalog: Record<number, Character[]>): AnimeSource {
+    return {
+      async malList() {
+        return [];
+      },
+      async topAnime() {
+        return Object.entries(titles).map(([id, title]) => ({ id: Number(id), title }));
+      },
+      async characters(animeId) {
+        return catalog[animeId] ?? [];
+      },
+    };
+  }
+
+  it("does not draw a Character of the history again", async () => {
+    const source = fakeSource({ 1: [character(10), character(11), character(12)] });
+    const history = { characters: [10, 11], franchise: "other" };
+    for (const value of [0, 0.5, 0.99]) {
+      const drawn = await drawCharacter(source, normal, () => value, history);
+      expect(drawn.character.id).toBe(12);
+    }
+  });
+
+  it("does not draw a Character of the history through another season", async () => {
+    const source = titledSource(
+      { 1: "Shingeki no Kyojin", 2: "Shingeki no Kyojin Season 2" },
+      { 1: [character(10), character(11)], 2: [character(10)] },
+    );
+    const drawn = await drawCharacter(source, normal, sequence(0.99, 0, 0), { characters: [10] });
+    expect(drawn.character.id).toBe(11);
+  });
+
+  it("draws every franchise with the same probability whatever its number of seasons", async () => {
+    const source = titledSource(
+      { 1: "Shingeki no Kyojin", 2: "Shingeki no Kyojin Season 3 Part 2", 3: "Shingeki no Kyojin: The Final Season", 4: "Naruto" },
+      { 1: [character(10)], 2: [character(20)], 3: [character(30)], 4: [character(40)] },
+    );
+    expect((await drawCharacter(source, normal, sequence(0.6, 0))).anime.id).toBe(4);
+    expect((await drawCharacter(source, normal, sequence(0.4, 0.99))).anime.id).toBe(3);
+  });
+
+  it("avoids the franchise of the current puzzle when the pool has others", async () => {
+    const source = titledSource(
+      { 1: "Shingeki no Kyojin", 2: "Shingeki no Kyojin Season 2", 3: "Naruto" },
+      { 1: [character(10), character(11)], 2: [character(20)], 3: [character(30)] },
+    );
+    for (const value of [0, 0.5, 0.99]) {
+      const drawn = await drawCharacter(source, normal, () => value, { characters: [10], franchise: "shingeki no kyojin" });
+      expect(drawn.anime.id).toBe(3);
+    }
+  });
+
+  it("draws the same franchise again when the pool has no other", async () => {
+    const source = titledSource({ 1: "Shingeki no Kyojin", 2: "Shingeki no Kyojin Season 2" }, { 1: [character(10)], 2: [character(20)] });
+    const drawn = await drawCharacter(source, normal, sequence(0, 0.99), { characters: [10], franchise: "shingeki no kyojin" });
+    expect(drawn.character.id).toBe(20);
+  });
+
+  it("lifts the exclusions instead of failing when they empty the pool", async () => {
+    const source = fakeSource({ 1: [character(10)] });
+    const drawn = await drawCharacter(source, normal, () => 0, { characters: [10], franchise: "anime 1" });
+    expect(drawn.character.id).toBe(10);
+  });
+
+  it("lifts the exclusions of a MAL list instead of failing", async () => {
+    const source = fakeSource({ 1: [character(10)] }, [{ id: 1, title: "Anime 1", status: "completed", score: 8 }]);
+    const pool = { username: "luffy", statuses: ["completed" as const], minScore: 0 };
+    const drawn = await drawCharacter(source, { pool, difficulty: "normal" }, () => 0, { characters: [10], franchise: "anime 1" });
+    expect(drawn.character.id).toBe(10);
+  });
+});
+
+describe("nextHistory", () => {
+  const drawn = (id: number, title: string): DrawnCharacter => ({
+    anime: { id: 1, title },
+    character: { ...character(id), picture: "https://cdn.example/x.jpg" },
+  });
+
+  it("adds the drawn Character and keeps its franchise", () => {
+    expect(nextHistory({ characters: [10] }, drawn(20, "Shingeki no Kyojin Season 2"))).toEqual({
+      characters: [10, 20],
+      franchise: "shingeki no kyojin",
+    });
+  });
+
+  it("keeps only the latest Characters", () => {
+    const long = { characters: Array.from({ length: 500 }, (_, index) => index) };
+    const { characters } = nextHistory(long, drawn(1000, "Naruto"));
+    expect(characters.length).toBeLessThan(500);
+    expect(characters.at(-1)).toBe(1000);
+    expect(characters).not.toContain(0);
   });
 });
 
