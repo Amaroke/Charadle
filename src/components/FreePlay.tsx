@@ -81,6 +81,7 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initi
   const [choices, setChoices] = useState<string[] | undefined>();
   const [pending, startTransition] = useTransition();
   const upcoming = useRef<{ settings: Settings; draw: Promise<Puzzle> } | null>(null);
+  const nextButton = useRef<HTMLButtonElement>(null);
   const game = state.status === "settings" ? state.previous : state;
   const ticket = game && game.status !== "error" ? game.puzzle.ticket : undefined;
 
@@ -114,6 +115,10 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initi
   function next() {
     if (settings) play(settings);
   }
+
+  useEffect(() => {
+    if (state.status === "over" && !pending) nextButton.current?.focus();
+  }, [state.status, pending]);
 
   const settingsButton = (
     <button
@@ -313,7 +318,7 @@ export function FreePlay({ labels, locale, initialSettings, initialPuzzle, initi
             </p>
           </section>
           {hintSection}
-          <button type="button" onClick={next} disabled={pending} aria-busy={pending} className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
+          <button type="button" onClick={next} disabled={pending} aria-busy={pending} ref={nextButton} className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom disabled:opacity-60">
             {pending ? labels.loading : labels.next}
           </button>
           {settingsButton}

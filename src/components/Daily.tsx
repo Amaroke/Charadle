@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useTransition, type FormEvent } from "react";
 import { guessDaily } from "@/game/daily-actions";
 import { dailyTiers } from "@/game/daily";
@@ -84,6 +85,7 @@ export function Daily({ labels, locale, date, initialView }: DailyProps) {
         </section>
         <Revealed labels={labels} revealed={view.revealed} />
         <p className="text-sm text-mist">{labels.comeBack}</p>
+        <Link href={`/${locale}`} className="text-sakura underline hover:text-blossom">{labels.home}</Link>
       </div>
     );
   }

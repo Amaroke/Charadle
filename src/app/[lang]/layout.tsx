@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
+import Link from "next/link";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { currentLocale, getDictionary } from "@/i18n/dictionaries";
 import { locales } from "@/i18n/locales";
@@ -45,8 +46,10 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
       <body className="flex min-h-full flex-col font-sans xl:bg-[url(/images/background.png)] xl:bg-cover xl:bg-fixed xl:bg-no-repeat">
         <header className="bg-ink">
           <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
-            <Image src="/images/logo.png" alt="" width={32} height={32} priority />
-            <span className="text-lg font-bold">Charadle</span>
+            <Link href={`/${locale}`} className="flex items-center gap-3 hover:text-blossom">
+              <Image src="/images/logo.png" alt="" width={32} height={32} priority />
+              <span className="text-lg font-bold">Charadle</span>
+            </Link>
             <div className="ml-auto">
               <LanguageSwitcher
                 locale={locale}

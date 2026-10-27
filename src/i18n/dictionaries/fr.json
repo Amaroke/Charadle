@@ -81,6 +81,7 @@
     "found": "Trouvé",
     "missed": "Raté",
     "comeBack": "Un nouveau Daily commence chaque jour à 12:00 UTC.",
+    "home": "Retour à l’accueil",
     "error": "Impossible de charger le Daily.",
     "loading": "Chargement du Daily…"
   }

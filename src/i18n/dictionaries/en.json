@@ -81,6 +81,7 @@
     "found": "Found",
     "missed": "Missed",
     "comeBack": "A new Daily starts every day at 12:00 UTC.",
+    "home": "Back to home",
     "error": "Could not load the Daily.",
     "loading": "Loading the Daily…"
   }

@@ -80,3 +80,11 @@ test("the cron draws the Daily only with its secret", async ({ request }) => {
   expect(first.ok()).toBe(true);
   expect(await second.json()).toEqual(await first.json());
 });
+
+test("the end of the Daily links back to the home page", async ({ page }) => {
+  await page.goto("/en/daily");
+  await guess(page, await answerOf(page));
+  await expect(page.getByText("Daily score: 7/7")).toBeVisible();
+  await page.getByRole("link", { name: "Back to home" }).click();
+  await expect(page).toHaveURL(/\/en$/);
+});
