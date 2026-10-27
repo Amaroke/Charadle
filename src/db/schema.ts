@@ -1,4 +1,4 @@
-import { boolean, date, jsonb, pgTable, primaryKey, smallint, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, date, integer, jsonb, pgTable, primaryKey, smallint, text, timestamp } from "drizzle-orm/pg-core";
 import type { DrawnCharacter } from "@/game/draw";
 
 export const dailies = pgTable("dailies", {
@@ -18,3 +18,10 @@ export const guestProgress = pgTable(
   },
   (table) => [primaryKey({ columns: [table.date, table.guest] })],
 );
+
+export const players = pgTable("players", {
+  malId: integer("mal_id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  signedInAt: timestamp("signed_in_at", { withTimezone: true }).notNull().defaultNow(),
+});

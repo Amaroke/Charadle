@@ -3,8 +3,11 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
+import { playerName } from "@/auth/session";
+import { Account } from "@/components/Account";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { currentLocale, getDictionary } from "@/i18n/dictionaries";
+import { currentLocale, getDictionary, type Dictionary } from "@/i18n/dictionaries";
 import { locales } from "@/i18n/locales";
 import "../globals.css";
 
@@ -34,6 +37,10 @@ export const viewport: Viewport = {
   themeColor: "#1d1d20",
 };
 
+async function SignedInAccount({ labels }: { labels: Dictionary["account"] }) {
+  return <Account labels={labels} name={await playerName()} />;
+}
+
 export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
   const locale = await currentLocale();
   const dict = await getDictionary();
@@ -50,7 +57,10 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
               <Image src="/images/logo.png" alt="" width={32} height={32} priority />
               <span className="text-lg font-bold">Charadle</span>
             </Link>
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-2">
+              <Suspense>
+                <SignedInAccount labels={dict.account} />
+              </Suspense>
               <LanguageSwitcher
                 locale={locale}
                 labels={{ label: dict.languageSwitcher.label, names: dict.languages }}

@@ -12,6 +12,10 @@
     "en": "English",
     "fr": "Français"
   },
+  "account": {
+    "signIn": "Connexion MAL",
+    "signOut": "Déconnexion"
+  },
   "freePlay": {
     "title": "Mode libre",
     "pictureAlt": "Personnage à deviner",

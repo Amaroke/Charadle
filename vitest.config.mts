@@ -10,5 +10,6 @@ export default defineConfig({
     environment: "jsdom",
     include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["./vitest.setup.ts"],
+    server: { deps: { inline: ["next-auth"] } },
   },
 });
