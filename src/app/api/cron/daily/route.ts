@@ -1,4 +1,4 @@
-import { todaysDaily } from "@/game/daily-game";
+import { forgetPreviousProgress, todaysDaily } from "@/game/daily-game";
 
 export async function GET(request: Request): Promise<Response> {
   const secret = process.env.CRON_SECRET;
@@ -6,5 +6,6 @@ export async function GET(request: Request): Promise<Response> {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { date } = await todaysDaily();
+  await forgetPreviousProgress(date);
   return Response.json({ date }, { headers: { "Cache-Control": "no-store" } });
 }

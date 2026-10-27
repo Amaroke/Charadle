@@ -1,10 +1,11 @@
+import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { database } from "@/db/client";
 import { dailyStore, ensureDaily } from "@/db/dailies";
+import { progressStore, recordGuess, type RecordedGuess } from "@/db/progress";
 import { dailyDate, dailyTiers, startDaily, type DailyProgress } from "@/game/daily";
 import { dailyView, type DailyView } from "@/game/daily-view";
 import { drawDaily, type DrawnCharacter } from "@/game/draw";
-import { gameSecret, openTicket, sealTicket } from "@/game/ticket";
 import { localizedTitle } from "@/game/title";
 import { defaultLocale, hasLocale } from "@/i18n/locales";
 import { malSource } from "@/mal/source";
@@ -15,10 +16,9 @@ export type TodaysDaily = {
   tiers: DrawnCharacter[];
 };
 
-type SavedProgress = DailyProgress & { date: string };
-
-const progressCookie = "DAILY_PROGRESS";
-const twoDays = 60 * 60 * 24 * 2;
+const guestCookie = "GUEST_ID";
+const oneYear = 60 * 60 * 24 * 365;
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 export async function todaysDaily(now: Date = new Date()): Promise<TodaysDaily> {
   const date = dailyDate(now);
@@ -26,22 +26,40 @@ export async function todaysDaily(now: Date = new Date()): Promise<TodaysDaily> 
   return { date, tiers };
 }
 
-export async function readProgress(date: string): Promise<DailyProgress> {
-  const value = (await cookies()).get(progressCookie)?.value;
-  const saved = value ? openTicket<SavedProgress>(value, gameSecret()) : undefined;
-  if (!saved || saved.date !== date) return startDaily();
-  return { tier: saved.tier, misses: saved.misses, found: saved.found };
+export async function forgetPreviousProgress(date: string): Promise<void> {
+  await progressStore(await database()).forgetBefore(date);
 }
 
-export async function saveProgress(date: string, progress: DailyProgress): Promise<void> {
-  const saved: SavedProgress = { date, ...progress };
-  (await cookies()).set(progressCookie, sealTicket(saved, gameSecret()), {
+async function guestId(): Promise<string | undefined> {
+  const value = (await cookies()).get(guestCookie)?.value;
+  return value && uuidPattern.test(value) ? value : undefined;
+}
+
+async function ensureGuestId(): Promise<string> {
+  const existing = await guestId();
+  if (existing) return existing;
+  const created = randomUUID();
+  (await cookies()).set(guestCookie, created, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: twoDays,
+    maxAge: oneYear,
   });
+  return created;
+}
+
+export async function readProgress(date: string): Promise<DailyProgress> {
+  const guest = await guestId();
+  if (!guest) return startDaily();
+  return progressStore(await database()).find(guest, date);
+}
+
+export async function playGuess(
+  date: string,
+  isCorrect: (progress: DailyProgress) => boolean,
+): Promise<RecordedGuess> {
+  return recordGuess(progressStore(await database()), await ensureGuestId(), date, isCorrect);
 }
 
 export function viewOf(tiers: DrawnCharacter[], progress: DailyProgress, locale: string): Promise<DailyView> {

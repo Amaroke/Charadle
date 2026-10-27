@@ -8,6 +8,13 @@
       "when": 1792328426931,
       "tag": "0000_dailies",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793110814741,
+      "tag": "0001_guest_progress",
+      "breakpoints": true
     }
   ]
 }
