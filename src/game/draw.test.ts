@@ -248,6 +248,13 @@ describe("drawCharacter with a history", () => {
     expect(drawn.character.id).toBe(20);
   });
 
+  it("finds the last Character left out of the history even in a pool of many Anime", async () => {
+    const catalog = Object.fromEntries(Array.from({ length: 8 }, (_, index) => [index + 1, [character((index + 1) * 10)]]));
+    const source = fakeSource(catalog);
+    const drawn = await drawCharacter(source, normal, () => 0, { characters: [10, 20, 30, 40, 50, 60, 70], franchise: "other" });
+    expect(drawn.character.id).toBe(80);
+  });
+
   it("lifts the exclusions instead of failing when they empty the pool", async () => {
     const source = fakeSource({ 1: [character(10)] });
     const drawn = await drawCharacter(source, normal, () => 0, { characters: [10], franchise: "anime 1" });

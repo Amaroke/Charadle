@@ -108,14 +108,14 @@ async function drawFrom(
   random: () => number,
   excluded: ReadonlySet<number> = new Set(),
 ): Promise<DrawnCharacter | undefined> {
-  for (let attempt = 0; attempt < maxAttempts && franchises.length > 0; attempt++) {
+  for (let misses = 0; misses < maxAttempts && franchises.length > 0; ) {
     const franchise = pick(franchises, random);
     const anime = pick(franchise, random);
     const characters = await source.characters(anime.id).catch((): Character[] => []);
-    const eligible = characters
-      .filter((character) => isEligible(character, difficulty))
-      .filter(({ id }) => !excluded.has(id));
-    if (eligible.length > 0) return { anime, character: pick(eligible, random) };
+    const eligible = characters.filter((character) => isEligible(character, difficulty));
+    const allowed = eligible.filter(({ id }) => !excluded.has(id));
+    if (allowed.length > 0) return { anime, character: pick(allowed, random) };
+    if (eligible.length === 0) misses++;
     franchise.splice(franchise.indexOf(anime), 1);
     if (franchise.length === 0) franchises.splice(franchises.indexOf(franchise), 1);
   }
