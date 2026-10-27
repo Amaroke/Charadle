@@ -2,10 +2,11 @@ import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { database } from "@/db/client";
 import { dailyStore, ensureDaily } from "@/db/dailies";
-import { progressStore, recordGuess, type RecordedGuess } from "@/db/progress";
+import { progressStore, recordGuess, recordHint, type RecordedGuess } from "@/db/progress";
 import { dailyDate, dailyTiers, startDaily, type DailyProgress } from "@/game/daily";
 import { dailyView, type DailyView } from "@/game/daily-view";
 import { drawDaily, type DrawnCharacter } from "@/game/draw";
+import type { HintKind } from "@/game/hint";
 import { localizedTitle } from "@/game/title";
 import { defaultLocale, hasLocale } from "@/i18n/locales";
 import { malSource } from "@/mal/source";
@@ -60,6 +61,10 @@ export async function playGuess(
   isCorrect: (progress: DailyProgress) => boolean,
 ): Promise<RecordedGuess> {
   return recordGuess(progressStore(await database()), await ensureGuestId(), date, isCorrect);
+}
+
+export async function playHint(date: string, kind: HintKind): Promise<DailyProgress> {
+  return recordHint(progressStore(await database()), await ensureGuestId(), date, kind);
 }
 
 export function viewOf(tiers: DrawnCharacter[], progress: DailyProgress, locale: string): Promise<DailyView> {

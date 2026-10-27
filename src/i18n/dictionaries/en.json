@@ -87,6 +87,18 @@
     "comeBack": "A new Daily starts every day at 12:00 UTC.",
     "home": "Back to home",
     "error": "Could not load the Daily.",
-    "loading": "Loading the Daily…"
+    "loading": "Loading the Daily…",
+    "hints": "Hints",
+    "hintAnime": "Reveal the anime (−1)",
+    "hintInitials": "Reveal the initials (−1)",
+    "anime": "Anime:",
+    "initials": "Initials:",
+    "share": "Share my result",
+    "copied": "Result copied!",
+    "shareFailed": "Could not share the result.",
+    "stats": "Your stats",
+    "played": "Played",
+    "wonCount": "Won",
+    "average": "Average score"
   }
 }

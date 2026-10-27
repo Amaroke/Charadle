@@ -1,5 +1,6 @@
 import { currentTier, dailyScore, dailyTiers, guessesPerTier, isOver, type DailyProgress } from "@/game/daily";
 import { fullName, type Anime, type DrawnCharacter } from "@/game/draw";
+import { initials, type HintKind } from "@/game/hint";
 import type { Reveal } from "@/game/puzzle";
 import type { Tier } from "@/game/settings";
 
@@ -9,8 +10,19 @@ export type DailyReveal = Reveal & {
 };
 
 export type DailyView =
-  | { status: "playing"; tier: Tier; picture: string; guessesLeft: number; revealed: DailyReveal[] }
-  | { status: "over"; score: number; revealed: DailyReveal[] };
+  | {
+      status: "playing";
+      tier: Tier;
+      picture: string;
+      guessesLeft: number;
+      hints: Partial<Record<HintKind, string>>;
+      revealed: DailyReveal[];
+    }
+  | { status: "over"; score: number; hintsUsed: number; revealed: DailyReveal[] };
+
+async function hintValue(kind: HintKind, { anime, character }: DrawnCharacter, title: (anime: Anime) => Promise<string>) {
+  return kind === "anime" ? title(anime) : initials(fullName(character));
+}
 
 export async function dailyView(
   tiers: DrawnCharacter[],
@@ -27,12 +39,18 @@ export async function dailyView(
     })),
   );
   const tier = currentTier(progress);
-  if (isOver(progress) || !tier) return { status: "over", score: dailyScore(progress), revealed };
+  if (isOver(progress) || !tier) {
+    return { status: "over", score: dailyScore(progress), hintsUsed: progress.hintsUsed, revealed };
+  }
+  const values = await Promise.all(
+    progress.tierHints.map(async (kind) => [kind, await hintValue(kind, tiers[progress.tier], title)] as const),
+  );
   return {
     status: "playing",
     tier,
     picture: tiers[progress.tier].character.picture,
     guessesLeft: guessesPerTier - progress.misses,
+    hints: Object.fromEntries(values),
     revealed,
   };
 }

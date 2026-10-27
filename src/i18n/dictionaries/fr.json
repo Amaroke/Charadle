@@ -87,6 +87,18 @@
     "comeBack": "Un nouveau Daily commence chaque jour à 12:00 UTC.",
     "home": "Retour à l’accueil",
     "error": "Impossible de charger le Daily.",
-    "loading": "Chargement du Daily…"
+    "loading": "Chargement du Daily…",
+    "hints": "Indices",
+    "hintAnime": "Révéler l’anime (−1)",
+    "hintInitials": "Révéler les initiales (−1)",
+    "anime": "Anime :",
+    "initials": "Initiales :",
+    "share": "Partager mon résultat",
+    "copied": "Résultat copié !",
+    "shareFailed": "Impossible de partager le résultat.",
+    "stats": "Tes stats",
+    "played": "Joués",
+    "wonCount": "Réussis",
+    "average": "Score moyen"
   }
 }

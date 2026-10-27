@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { afterGuess, currentTier, dailyDate, dailyScore, dailyTiers, isOver, startDaily, type DailyProgress } from "@/game/daily";
+import { afterGuess, afterHint, currentTier, dailyDate, dailyScore, dailyTiers, isOver, startDaily, type DailyProgress } from "@/game/daily";
 
 function play(...guesses: boolean[]): DailyProgress {
   return guesses.reduce(afterGuess, startDaily());
@@ -45,6 +45,26 @@ describe("Daily progress", () => {
   });
 });
 
+describe("Hints in the Daily", () => {
+  it("starts with no Hint used", () => {
+    expect(startDaily()).toMatchObject({ hintsUsed: 0, tierHints: [] });
+  });
+
+  it("counts a Hint once on the current Tier", () => {
+    const progress = afterHint(afterHint(play(false), "anime"), "anime");
+    expect(progress).toMatchObject({ misses: 1, hintsUsed: 1, tierHints: ["anime"] });
+  });
+
+  it("keeps the Hints used on previous Tiers in the count only", () => {
+    const progress = afterGuess(afterGuess(afterHint(startDaily(), "initials"), false), false);
+    expect(progress).toMatchObject({ tier: 1, hintsUsed: 1, tierHints: [] });
+  });
+
+  it("ignores Hints once over", () => {
+    expect(afterHint(play(true), "anime")).toEqual(play(true));
+  });
+});
+
 describe("dailyScore", () => {
   it("is 7 when found at Top 500", () => {
     expect(dailyScore(play(true))).toBe(7);
@@ -60,6 +80,16 @@ describe("dailyScore", () => {
 
   it("is 0 when every Tier is failed", () => {
     expect(dailyScore(play(...Array<boolean>(14).fill(false)))).toBe(0);
+  });
+
+  it("loses 1 per Hint used", () => {
+    const hinted = afterHint(afterHint(afterGuess(afterGuess(afterHint(startDaily(), "anime"), false), false), "anime"), "initials");
+    expect(dailyScore(afterGuess(hinted, true))).toBe(3);
+  });
+
+  it("is never below 0", () => {
+    const failed = play(...Array<boolean>(12).fill(false));
+    expect(dailyScore(afterGuess(afterHint(afterHint(failed, "anime"), "initials"), true))).toBe(0);
   });
 });
 

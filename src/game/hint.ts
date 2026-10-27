@@ -1,4 +1,6 @@
-export type HintKind = "anime" | "initials";
+export const hintKinds = ["anime", "initials"] as const;
+
+export type HintKind = (typeof hintKinds)[number];
 
 export function initials(name: string): string {
   return name
