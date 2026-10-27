@@ -15,6 +15,9 @@ export const guestProgress = pgTable(
     tier: smallint("tier").notNull(),
     misses: smallint("misses").notNull(),
     found: boolean("found").notNull(),
+    hintsUsed: smallint("hints_used").notNull().default(0),
+    animeHint: boolean("anime_hint").notNull().default(false),
+    initialsHint: boolean("initials_hint").notNull().default(false),
   },
   (table) => [primaryKey({ columns: [table.date, table.guest] })],
 );

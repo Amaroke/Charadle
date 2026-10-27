@@ -88,3 +88,42 @@ test("the end of the Daily links back to the home page", async ({ page }) => {
   await page.getByRole("link", { name: "Back to home" }).click();
   await expect(page).toHaveURL(/\/en$/);
 });
+
+test("Hints cost the Daily score and the result is shared without spoiler", async ({ page, isMobile }) => {
+  await page.addInitScript(() => {
+    const shared: string[][] = [];
+    Object.assign(window, { shared });
+    Object.defineProperty(navigator, "share", { value: async ({ text }: { text: string }) => void shared.push(["share", text]) });
+    Object.defineProperty(navigator, "clipboard", { value: { writeText: async (text: string) => void shared.push(["clipboard", text]) } });
+  });
+  const responses: string[] = [];
+  page.on("response", async (response) => {
+    if (response.url().includes("/daily")) responses.push(await response.text().catch(() => ""));
+  });
+  await page.goto("/en/daily");
+  const answer = await answerOf(page);
+  const hints = page.getByRole("region", { name: "Hints" });
+
+  await hints.getByRole("button", { name: "Reveal the anime (−1)" }).click();
+  const anime = hints.getByText("Anime:").locator("..").locator("span.font-bold");
+  await expect(anime).toBeVisible();
+  const title = await anime.textContent();
+  const before = responses.length;
+  await page.reload();
+  await expect(anime).toHaveText(title!);
+  expect(responses.slice(0, before - 1).join("\n")).not.toContain(title!);
+
+  await hints.getByRole("button", { name: "Reveal the initials (−1)" }).click();
+  await expect(hints.getByText("Initials:")).toBeVisible();
+  await guess(page, answer);
+  await expect(page.getByText("Daily score: 5/7")).toBeVisible();
+
+  await page.getByRole("button", { name: "Share my result" }).click();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { shared: string[][] }).shared)).toEqual([[isMobile ? "share" : "clipboard", expect.stringMatching(/^Charadle #\d+ 🟩 💡2 5\/7$/)]]);
+  if (!isMobile) await expect(page.getByText("Result copied!")).toBeVisible();
+
+  const stats = page.getByRole("region", { name: "Your stats" });
+  await expect(stats.getByText("Played").locator("..")).toContainText("1");
+  await page.reload();
+  await expect(stats.getByText("Average score").locator("..")).toContainText("5");
+});

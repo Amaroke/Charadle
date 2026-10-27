@@ -2,7 +2,8 @@ import { isDeepStrictEqual } from "node:util";
 import { and, eq, lt } from "drizzle-orm";
 import type { Database } from "@/db/client";
 import { guestProgress } from "@/db/schema";
-import { afterGuess, isOver, startDaily, type DailyProgress } from "@/game/daily";
+import { afterGuess, afterHint, isOver, startDaily, type DailyProgress } from "@/game/daily";
+import { hintKinds, type HintKind } from "@/game/hint";
 
 export type ProgressStore = {
   find(guest: string, date: string): Promise<DailyProgress>;
@@ -12,30 +13,60 @@ export type ProgressStore = {
 
 export type RecordedGuess = { correct: boolean; progress: DailyProgress };
 
+type ProgressRow = Omit<typeof guestProgress.$inferSelect, "date" | "guest">;
+
+function toRow({ tier, misses, found, hintsUsed, tierHints }: DailyProgress): ProgressRow {
+  return {
+    tier,
+    misses,
+    found,
+    hintsUsed,
+    animeHint: tierHints.includes("anime"),
+    initialsHint: tierHints.includes("initials"),
+  };
+}
+
+function fromRow({ tier, misses, found, hintsUsed, animeHint, initialsHint }: ProgressRow): DailyProgress {
+  const used: Record<HintKind, boolean> = { anime: animeHint, initials: initialsHint };
+  return { tier, misses, found, hintsUsed, tierHints: hintKinds.filter((kind) => used[kind]) };
+}
+
 export function progressStore(database: Database): ProgressStore {
   return {
     async find(guest, date) {
       const [saved] = await database
-        .select({ tier: guestProgress.tier, misses: guestProgress.misses, found: guestProgress.found })
+        .select({
+          tier: guestProgress.tier,
+          misses: guestProgress.misses,
+          found: guestProgress.found,
+          hintsUsed: guestProgress.hintsUsed,
+          animeHint: guestProgress.animeHint,
+          initialsHint: guestProgress.initialsHint,
+        })
         .from(guestProgress)
         .where(and(eq(guestProgress.guest, guest), eq(guestProgress.date, date)));
-      return saved ?? startDaily();
+      return saved ? fromRow(saved) : startDaily();
     },
     async advance(guest, date, from, to) {
+      const before = toRow(from);
+      const after = toRow(to);
       const unchanged = and(
-        eq(guestProgress.tier, from.tier),
-        eq(guestProgress.misses, from.misses),
-        eq(guestProgress.found, from.found),
+        eq(guestProgress.tier, before.tier),
+        eq(guestProgress.misses, before.misses),
+        eq(guestProgress.found, before.found),
+        eq(guestProgress.hintsUsed, before.hintsUsed),
+        eq(guestProgress.animeHint, before.animeHint),
+        eq(guestProgress.initialsHint, before.initialsHint),
       );
       const updated = isDeepStrictEqual(from, startDaily())
         ? await database
             .insert(guestProgress)
-            .values({ date, guest, ...to })
-            .onConflictDoUpdate({ target: [guestProgress.date, guestProgress.guest], set: to, setWhere: unchanged })
+            .values({ date, guest, ...after })
+            .onConflictDoUpdate({ target: [guestProgress.date, guestProgress.guest], set: after, setWhere: unchanged })
             .returning({ guest: guestProgress.guest })
         : await database
             .update(guestProgress)
-            .set(to)
+            .set(after)
             .where(and(eq(guestProgress.date, date), eq(guestProgress.guest, guest), unchanged))
             .returning({ guest: guestProgress.guest });
       return updated.length === 1;
@@ -58,4 +89,12 @@ export async function recordGuess(
   const next = afterGuess(progress, correct);
   if (await store.advance(guest, date, progress, next)) return { correct, progress: next };
   return { correct: false, progress: await store.find(guest, date) };
+}
+
+export async function recordHint(store: ProgressStore, guest: string, date: string, kind: HintKind): Promise<DailyProgress> {
+  const progress = await store.find(guest, date);
+  const next = afterHint(progress, kind);
+  if (next === progress) return progress;
+  if (await store.advance(guest, date, progress, next)) return next;
+  return store.find(guest, date);
 }

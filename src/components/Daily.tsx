@@ -2,11 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useTransition, type FormEvent } from "react";
-import { guessDaily } from "@/game/daily-actions";
+import { useEffect, useState, useTransition, type FormEvent } from "react";
+import { GuestStatsSummary, saveDaily } from "@/components/GuestStats";
+import { guessDaily, hintDaily } from "@/game/daily-actions";
 import { dailyTiers } from "@/game/daily";
 import type { DailyReveal, DailyView } from "@/game/daily-view";
 import { maxGuessLength } from "@/game/guess";
+import type { HintKind } from "@/game/hint";
+import { shareText } from "@/game/share";
 import type { Dictionary } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
 
@@ -18,6 +21,7 @@ type DailyProps = {
 };
 
 type Feedback = "wrong" | "tierFailed" | "failed" | "expired";
+type Shared = "copied" | "shareFailed";
 
 function fill(template: string, values: Record<string, string | number>): string {
   return template.replace(/\{(\w+)\}/g, (match, key: string) => String(values[key] ?? match));
@@ -45,6 +49,57 @@ function Revealed({ labels, revealed }: { labels: Dictionary["daily"]; revealed:
   );
 }
 
+async function share(text: string): Promise<Shared | undefined> {
+  if (typeof navigator.share === "function" && matchMedia("(pointer: coarse)").matches) {
+    try {
+      await navigator.share({ text });
+      return undefined;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return undefined;
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    return "copied";
+  } catch {
+    return "shareFailed";
+  }
+}
+
+type EndedProps = {
+  labels: Dictionary["daily"];
+  locale: Locale;
+  date: string;
+  view: Extract<DailyView, { status: "over" }>;
+};
+
+function Ended({ labels, locale, date, view }: EndedProps) {
+  const [shared, setShared] = useState<Shared>();
+
+  useEffect(() => saveDaily(date, view.score), [date, view.score]);
+
+  return (
+    <div className="flex w-full max-w-sm flex-col items-center gap-4">
+      <section aria-live="polite" className="flex flex-col items-center gap-1 text-center">
+        <p className="text-2xl font-bold text-sakura">{view.revealed.some(({ found }) => found) ? labels.won : labels.lost}</p>
+        <p className="text-lg">{fill(labels.score, { score: view.score, max: dailyTiers.length })}</p>
+      </section>
+      <button
+        type="button"
+        onClick={async () => setShared(await share(shareText(date, view)))}
+        className="rounded bg-sakura px-4 py-2 font-bold text-ink hover:bg-blossom"
+      >
+        {labels.share}
+      </button>
+      {shared && <p role="status" className="text-sm text-mist">{labels[shared]}</p>}
+      <Revealed labels={labels} revealed={view.revealed} />
+      <GuestStatsSummary labels={labels} />
+      <p className="text-sm text-mist">{labels.comeBack}</p>
+      <Link href={`/${locale}`} className="text-sakura underline hover:text-blossom">{labels.home}</Link>
+    </div>
+  );
+}
+
 export function Daily({ labels, locale, date, initialView }: DailyProps) {
   const [view, setView] = useState(initialView);
   const [guess, setGuess] = useState("");
@@ -67,6 +122,19 @@ export function Daily({ labels, locale, date, initialView }: DailyProps) {
     });
   }
 
+  function reveal(kind: HintKind) {
+    startTransition(async () => {
+      try {
+        const result = await hintDaily(date, kind, locale);
+        if (result.expired) return setFeedback("expired");
+        setFeedback((current) => (current === "failed" || current === "expired" ? undefined : current));
+        setView(result.view);
+      } catch {
+        setFeedback("failed");
+      }
+    });
+  }
+
   const alert = feedback && (
     <p role="alert" className="text-blossom">
       {labels[feedback]}{" "}
@@ -76,19 +144,12 @@ export function Daily({ labels, locale, date, initialView }: DailyProps) {
     </p>
   );
 
-  if (view.status === "over") {
-    return (
-      <div className="flex w-full max-w-sm flex-col items-center gap-4">
-        <section aria-live="polite" className="flex flex-col items-center gap-1 text-center">
-          <p className="text-2xl font-bold text-sakura">{view.score > 0 ? labels.won : labels.lost}</p>
-          <p className="text-lg">{fill(labels.score, { score: view.score, max: dailyTiers.length })}</p>
-        </section>
-        <Revealed labels={labels} revealed={view.revealed} />
-        <p className="text-sm text-mist">{labels.comeBack}</p>
-        <Link href={`/${locale}`} className="text-sakura underline hover:text-blossom">{labels.home}</Link>
-      </div>
-    );
-  }
+  if (view.status === "over") return <Ended labels={labels} locale={locale} date={date} view={view} />;
+
+  const hintRows: { kind: HintKind; label: string; button: string }[] = [
+    { kind: "anime", label: labels.anime, button: labels.hintAnime },
+    { kind: "initials", label: labels.initials, button: labels.hintInitials },
+  ];
 
   return (
     <div className="flex w-full max-w-sm flex-col items-center gap-4">
@@ -124,6 +185,26 @@ export function Daily({ labels, locale, date, initialView }: DailyProps) {
         </button>
       </form>
       {alert}
+      <section aria-label={labels.hints} className="flex w-full flex-col items-center gap-2">
+        {hintRows.map(({ kind, label, button }) =>
+          kind in view.hints ? (
+            <p key={kind} className="rounded border border-mist/40 px-3 py-1 text-sm">
+              <span className="text-mist">{label} </span>
+              <span className="font-bold">{view.hints[kind]}</span>
+            </p>
+          ) : (
+            <button
+              key={kind}
+              type="button"
+              onClick={() => reveal(kind)}
+              disabled={pending}
+              className="rounded border border-sakura px-3 py-1 text-sm text-sakura hover:bg-sakura hover:text-ink disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-sakura"
+            >
+              {button}
+            </button>
+          ),
+        )}
+      </section>
       <Revealed labels={labels} revealed={view.revealed} />
     </div>
   );
