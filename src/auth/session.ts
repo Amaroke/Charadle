@@ -27,7 +27,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
         await playerStore(await database()).signIn({ malId: id, name });
         token.malId = id;
       }
-      return token;
+      return typeof token.malId === "number" ? token : null;
     },
     session({ session, token }) {
       if (typeof token.malId === "number") session.user.id = String(token.malId);
