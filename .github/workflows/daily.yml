@@ -15,7 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - run: curl --silent --show-error --fail-with-body --max-time 240 -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/daily"
+      - run: |
+          curl --silent --show-error --fail-with-body --max-time 240 -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/daily"
         env:
           APP_URL: ${{ vars.APP_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
