@@ -33,6 +33,12 @@ describe("playerDailyStore", () => {
     expect(await store.scores(42)).toEqual({ "2026-10-18": 5, "2026-10-17": 6 });
   });
 
+  it("replaces a merged Daily by the same Daily played signed in", async () => {
+    await store.merge(42, { "2026-10-18": 2 });
+    await store.record(42, "2026-10-18", 6);
+    expect(await store.leaderboardScores(42)).toEqual({ "2026-10-18": 6 });
+  });
+
   it("marks the merged Dailies as excluded from the Leaderboard", async () => {
     await store.record(42, "2026-10-18", 5);
     await store.merge(42, { "2026-10-17": 6 });

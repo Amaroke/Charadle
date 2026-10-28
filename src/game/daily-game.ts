@@ -67,6 +67,16 @@ export async function playGuess(
   return recorded;
 }
 
+export async function claimGuestDaily(malId: number, now: Date = new Date()): Promise<void> {
+  try {
+    const date = dailyDate(now);
+    const progress = await readProgress(date);
+    if (isOver(progress)) await playerDailyStore(await database()).record(malId, date, dailyScore(progress));
+  } catch (error) {
+    console.error("The Daily of a Guest could not be claimed", error);
+  }
+}
+
 async function recordPlayerDaily(date: string, score: number): Promise<void> {
   const player = await signedInPlayer();
   if (!player) return;

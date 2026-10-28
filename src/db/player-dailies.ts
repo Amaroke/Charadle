@@ -23,7 +23,14 @@ export function playerDailyStore(database: Database): PlayerDailyStore {
 
   return {
     async record(malId, date, score) {
-      await database.insert(playerDailies).values({ malId, date, score }).onConflictDoNothing();
+      await database
+        .insert(playerDailies)
+        .values({ malId, date, score })
+        .onConflictDoUpdate({
+          target: [playerDailies.malId, playerDailies.date],
+          set: { score, merged: false },
+          setWhere: eq(playerDailies.merged, true),
+        });
     },
     async merge(malId, stats) {
       const rows = Object.entries(stats).map(([date, score]) => ({ malId, date, score, merged: true }));

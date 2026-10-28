@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { malProvider, type MalProfile } from "@/auth/mal";
 import { database } from "@/db/client";
 import { playerStore } from "@/db/players";
+import { claimGuestDaily } from "@/game/daily-game";
 
 function required(name: string): string {
   const value = process.env[name];
@@ -25,6 +26,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
       if (profile) {
         const { id, name } = profile as unknown as MalProfile;
         await playerStore(await database()).signIn({ malId: id, name });
+        await claimGuestDaily(id);
         token.malId = id;
       }
       return typeof token.malId === "number" ? token : null;
