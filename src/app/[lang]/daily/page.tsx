@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { signedInPlayer } from "@/auth/session";
 import { Daily, DailySkeleton } from "@/components/Daily";
+import { DailyPending } from "@/db/dailies";
 import { readProgress, todaysDaily, viewOf, type TodaysDaily as Today } from "@/game/daily-game";
 import { currentLocale, getDictionary, type Dictionary } from "@/i18n/dictionaries";
 import type { Locale } from "@/i18n/locales";
@@ -12,19 +13,20 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: `${dict.daily.title} · Charadle` };
 }
 
-async function today(): Promise<Today | undefined> {
+async function today(): Promise<Today | "pending" | "error"> {
   try {
     return await todaysDaily();
   } catch (error) {
     console.error("The Daily could not be loaded", error);
-    return undefined;
+    return error instanceof DailyPending ? "pending" : "error";
   }
 }
 
 async function TodaysDaily({ labels, locale }: { labels: Dictionary["daily"]; locale: Locale }) {
   await connection();
   const daily = await today();
-  if (!daily) return <p role="alert">{labels.error}</p>;
+  if (daily === "pending") return <p role="status">{labels.pending}</p>;
+  if (daily === "error") return <p role="alert">{labels.error}</p>;
   const [view, player] = await Promise.all([
     readProgress(daily.date).then((progress) => viewOf(daily.tiers, progress, locale)),
     signedInPlayer(),

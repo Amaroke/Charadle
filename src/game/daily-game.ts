@@ -23,9 +23,9 @@ const guestCookie = "GUEST_ID";
 const oneYear = 60 * 60 * 24 * 365;
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-export async function todaysDaily(now: Date = new Date()): Promise<TodaysDaily> {
+export async function todaysDaily(now: Date = new Date(), { force = false }: { force?: boolean } = {}): Promise<TodaysDaily> {
   const date = dailyDate(now);
-  const tiers = await ensureDaily(dailyStore(await database()), date, () => drawDaily(malSource, dailyTiers));
+  const tiers = await ensureDaily(dailyStore(await database()), date, () => drawDaily(malSource, dailyTiers), { now, force });
   return { date, tiers };
 }
 

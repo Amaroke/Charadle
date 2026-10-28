@@ -36,6 +36,13 @@
       "when": 1793129887160,
       "tag": "0004_player_dailies",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793179132945,
+      "tag": "0005_daily_draws",
+      "breakpoints": true
     }
   ]
 }

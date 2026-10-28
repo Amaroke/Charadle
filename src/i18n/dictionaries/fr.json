@@ -87,6 +87,7 @@
     "comeBack": "Un nouveau Daily commence chaque jour à 12:00 UTC.",
     "home": "Retour à l’accueil",
     "error": "Impossible de charger le Daily.",
+    "pending": "Le Daily du jour arrive bientôt. Reviens dans un moment.",
     "loading": "Chargement du Daily…",
     "hints": "Indices",
     "hintAnime": "Révéler l’anime (−1)",
