@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { playerName } from "@/auth/session";
 import { Account } from "@/components/Account";
+import { MergeGuestStats } from "@/components/GuestStats";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { currentLocale, getDictionary, type Dictionary } from "@/i18n/dictionaries";
 import { locales } from "@/i18n/locales";
@@ -38,7 +39,13 @@ export const viewport: Viewport = {
 };
 
 async function SignedInAccount({ labels }: { labels: Dictionary["account"] }) {
-  return <Account labels={labels} name={await playerName()} />;
+  const name = await playerName();
+  return (
+    <>
+      {name && <MergeGuestStats />}
+      <Account labels={labels} name={name} />
+    </>
+  );
 }
 
 export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
@@ -58,6 +65,9 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
               <span className="text-lg font-bold">Charadle</span>
             </Link>
             <div className="ml-auto flex items-center gap-2">
+              <Link href={`/${locale}/stats`} className="rounded px-2 py-1 text-sm text-mist hover:text-blossom">
+                {dict.stats.title}
+              </Link>
               <Suspense>
                 <SignedInAccount labels={dict.account} />
               </Suspense>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { signedInPlayer } from "@/auth/session";
 import { Daily, DailySkeleton } from "@/components/Daily";
 import { readProgress, todaysDaily, viewOf, type TodaysDaily as Today } from "@/game/daily-game";
 import { currentLocale, getDictionary, type Dictionary } from "@/i18n/dictionaries";
@@ -24,8 +25,11 @@ async function TodaysDaily({ labels, locale }: { labels: Dictionary["daily"]; lo
   await connection();
   const daily = await today();
   if (!daily) return <p role="alert">{labels.error}</p>;
-  const view = await viewOf(daily.tiers, await readProgress(daily.date), locale);
-  return <Daily labels={labels} locale={locale} date={daily.date} initialView={view} />;
+  const [view, player] = await Promise.all([
+    readProgress(daily.date).then((progress) => viewOf(daily.tiers, progress, locale)),
+    signedInPlayer(),
+  ]);
+  return <Daily labels={labels} locale={locale} date={daily.date} initialView={view} signedIn={!!player} />;
 }
 
 export default async function DailyPage() {

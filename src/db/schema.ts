@@ -28,3 +28,16 @@ export const players = pgTable("players", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   signedInAt: timestamp("signed_in_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const playerDailies = pgTable(
+  "player_dailies",
+  {
+    malId: integer("mal_id")
+      .notNull()
+      .references(() => players.malId),
+    date: date("date", { mode: "string" }).notNull(),
+    score: smallint("score").notNull(),
+    merged: boolean("merged").notNull().default(false),
+  },
+  (table) => [primaryKey({ columns: [table.malId, table.date] })],
+);

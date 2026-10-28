@@ -1,6 +1,9 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useSyncExternalStore } from "react";
+import { Stats } from "@/components/Stats";
+import { mergeGuestStats } from "@/game/stats-actions";
 import { parseGuestStats, summarize, withDaily, type GuestStats } from "@/game/guest-stats";
 import type { Dictionary } from "@/i18n/dictionaries";
 
@@ -41,11 +44,46 @@ export function saveDaily(date: string, score: number): void {
   } catch {
     return;
   }
+  notify();
+}
+
+function notify(): void {
   listeners.forEach((listener) => listener());
 }
 
+function useGuestStats(): GuestStats {
+  return useSyncExternalStore(subscribe, snapshot, () => empty);
+}
+
+export function MergeGuestStats() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const raw = readRaw();
+    if (Object.keys(parseGuestStats(raw)).length === 0) return;
+    mergeGuestStats(raw!)
+      .then((merged) => {
+        if (!merged) return;
+        try {
+          localStorage.removeItem(storageKey);
+        } catch {
+          return;
+        }
+        notify();
+        router.refresh();
+      })
+      .catch(() => undefined);
+  }, [router]);
+  return null;
+}
+
+export function GuestStatsDetails({ labels }: { labels: Dictionary["stats"] }) {
+  const stats = useSyncExternalStore(subscribe, snapshot, () => undefined);
+  return stats && <Stats labels={labels} scores={stats} />;
+}
+
 export function GuestStatsSummary({ labels }: { labels: Dictionary["daily"] }) {
-  const stats = useSyncExternalStore(subscribe, snapshot, () => empty);
+  const stats = useGuestStats();
   const { played, won, average } = summarize(stats);
   if (played === 0) return null;
   const rows = [

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseGuestStats, summarize, withDaily } from "@/game/guest-stats";
+import { distribution, parseGuestStats, summarize, withDaily } from "@/game/guest-stats";
 
 describe("parseGuestStats", () => {
   it("reads the Daily scores saved by date", () => {
@@ -35,5 +35,17 @@ describe("summarize", () => {
 
   it("averages to 0 before any Daily", () => {
     expect(summarize({})).toEqual({ played: 0, won: 0, average: 0 });
+  });
+});
+
+describe("distribution", () => {
+  it("counts the Dailies played for each Daily score", () => {
+    expect(distribution({ "2026-10-18": 5, "2026-10-19": 0, "2026-10-20": 5 })).toEqual([1, 0, 0, 0, 0, 2, 0, 0]);
+  });
+});
+
+describe("parseGuestStats dates", () => {
+  it("drops the dates that do not exist", () => {
+    expect(parseGuestStats('{"2026-10-18":5,"2026-13-45":3,"2026-02-30":2}')).toEqual({ "2026-10-18": 5 });
   });
 });

@@ -18,6 +18,7 @@ type DailyProps = {
   locale: Locale;
   date: string;
   initialView: DailyView;
+  signedIn: boolean;
 };
 
 type Feedback = "wrong" | "tierFailed" | "failed" | "expired";
@@ -71,9 +72,10 @@ type EndedProps = {
   locale: Locale;
   date: string;
   view: Extract<DailyView, { status: "over" }>;
+  signedIn: boolean;
 };
 
-function Ended({ labels, locale, date, view }: EndedProps) {
+function Ended({ labels, locale, date, view, signedIn }: EndedProps) {
   const [shared, setShared] = useState<Shared>();
 
   useEffect(() => saveDaily(date, view.score), [date, view.score]);
@@ -93,14 +95,18 @@ function Ended({ labels, locale, date, view }: EndedProps) {
       </button>
       {shared && <p role="status" className="text-sm text-mist">{labels[shared]}</p>}
       <Revealed labels={labels} revealed={view.revealed} />
-      <GuestStatsSummary labels={labels} />
+      {signedIn ? (
+        <Link href={`/${locale}/stats`} className="text-sakura underline hover:text-blossom">{labels.myStats}</Link>
+      ) : (
+        <GuestStatsSummary labels={labels} />
+      )}
       <p className="text-sm text-mist">{labels.comeBack}</p>
       <Link href={`/${locale}`} className="text-sakura underline hover:text-blossom">{labels.home}</Link>
     </div>
   );
 }
 
-export function Daily({ labels, locale, date, initialView }: DailyProps) {
+export function Daily({ labels, locale, date, initialView, signedIn }: DailyProps) {
   const [view, setView] = useState(initialView);
   const [guess, setGuess] = useState("");
   const [feedback, setFeedback] = useState<Feedback>();
@@ -144,7 +150,7 @@ export function Daily({ labels, locale, date, initialView }: DailyProps) {
     </p>
   );
 
-  if (view.status === "over") return <Ended labels={labels} locale={locale} date={date} view={view} />;
+  if (view.status === "over") return <Ended labels={labels} locale={locale} date={date} view={view} signedIn={signedIn} />;
 
   const hintRows: { kind: HintKind; label: string; button: string }[] = [
     { kind: "anime", label: labels.anime, button: labels.hintAnime },
