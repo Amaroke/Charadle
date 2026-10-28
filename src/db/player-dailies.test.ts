@@ -41,6 +41,26 @@ describe("playerDailyStore", () => {
     expect(await store.scores(42)).toEqual({ "2026-10-18": 5, "2026-10-17": 6 });
   });
 
+  it("lists the Players of the Leaderboard without their merged Dailies", async () => {
+    await store.record(42, "2026-10-18", 5);
+    await store.merge(42, { "2026-10-17": 6 });
+    await store.record(7, "2026-10-18", 3);
+    await store.merge(7, { "2026-10-16": 2 });
+    const players = await store.leaderboardPlayers();
+    expect(players).toHaveLength(2);
+    expect(players).toEqual(
+      expect.arrayContaining([
+        { name: "luffyfan", scores: { "2026-10-18": 5 } },
+        { name: "zorofan", scores: { "2026-10-18": 3 } },
+      ]),
+    );
+  });
+
+  it("leaves out of the Leaderboard a Player with only merged Dailies", async () => {
+    await store.merge(42, { "2026-10-17": 6 });
+    expect(await store.leaderboardPlayers()).toEqual([]);
+  });
+
   it("merges nothing from empty Guest stats", async () => {
     await store.merge(42, {});
     expect(await store.scores(42)).toEqual({});

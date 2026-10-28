@@ -4,9 +4,10 @@ import type { Dictionary } from "@/i18n/dictionaries";
 type StatsProps = {
   labels: Dictionary["stats"];
   scores: GuestStats;
+  streak?: number;
 };
 
-export function Stats({ labels, scores }: StatsProps) {
+export function Stats({ labels, scores, streak }: StatsProps) {
   const { played, won, average } = summarize(scores);
   if (played === 0) return <p className="text-mist">{labels.empty}</p>;
   const counts = distribution(scores);
@@ -15,10 +16,11 @@ export function Stats({ labels, scores }: StatsProps) {
     { label: labels.played, value: played },
     { label: labels.won, value: won },
     { label: labels.average, value: average },
+    ...(streak === undefined ? [] : [{ label: labels.streak, value: streak }]),
   ];
   return (
     <div className="flex w-full max-w-sm flex-col gap-6">
-      <dl className="grid grid-cols-3 gap-2 text-center">
+      <dl className={`grid gap-2 text-center ${streak !== undefined ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"}`}>
         {rows.map(({ label, value }) => (
           <div key={label} className="rounded border border-mist/40 px-2 py-1">
             <dt className="text-xs text-mist">{label}</dt>

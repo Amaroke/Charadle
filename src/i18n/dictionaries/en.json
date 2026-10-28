@@ -110,6 +110,18 @@
     "average": "Average score",
     "distribution": "Score distribution",
     "empty": "No Daily played yet.",
-    "guest": "These stats live only in this browser. Sign in with MAL to keep them."
+    "guest": "These stats live only in this browser. Sign in with MAL to keep them.",
+    "streak": "Streak"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "heading": "Daily Leaderboard",
+    "today": "Today's Daily",
+    "average": "Average score",
+    "averageNote": "From {count} Dailies played",
+    "streak": "Current Streak",
+    "empty": "No Player ranked yet.",
+    "note": "Only Dailies played while signed in count.",
+    "error": "The Leaderboard could not be loaded."
   }
 }
