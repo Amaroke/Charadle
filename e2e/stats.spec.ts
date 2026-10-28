@@ -32,6 +32,11 @@ test("the Guest stats are merged into the Player stats on sign-in", async ({ pag
   await page.goto("/en/daily");
   await expect(page.getByRole("link", { name: "See my stats" })).toBeVisible();
 
+  await page.goto("/en/leaderboard");
+  await expect(
+    page.getByRole("region", { name: "Today's Daily" }).getByRole("listitem", { name: "1. luffyfan: 7" }),
+  ).toBeVisible();
+
   await page.goto("/en/stats");
   await banner.getByRole("button", { name: "Sign out" }).click();
   await expect(banner.getByRole("button", { name: "Sign in with MAL" })).toBeVisible();

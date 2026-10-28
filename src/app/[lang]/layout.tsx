@@ -59,14 +59,17 @@ export default async function RootLayout({ children }: LayoutProps<"/[lang]">) {
     >
       <body className="flex min-h-full flex-col font-sans xl:bg-[url(/images/background.png)] xl:bg-cover xl:bg-fixed xl:bg-no-repeat">
         <header className="bg-ink">
-          <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-3">
             <Link href={`/${locale}`} className="flex items-center gap-3 hover:text-blossom">
               <Image src="/images/logo.png" alt="" width={32} height={32} priority />
               <span className="text-lg font-bold">Charadle</span>
             </Link>
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
               <Link href={`/${locale}/stats`} className="rounded px-2 py-1 text-sm text-mist hover:text-blossom">
                 {dict.stats.title}
+              </Link>
+              <Link href={`/${locale}/leaderboard`} className="rounded px-2 py-1 text-sm text-mist hover:text-blossom">
+                {dict.leaderboard.title}
               </Link>
               <Suspense>
                 <SignedInAccount labels={dict.account} />

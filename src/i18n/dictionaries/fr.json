@@ -110,6 +110,18 @@
     "average": "Score moyen",
     "distribution": "Répartition des scores",
     "empty": "Aucun Daily joué pour l'instant.",
-    "guest": "Ces stats vivent seulement dans ce navigateur. Connecte-toi avec MAL pour les garder."
+    "guest": "Ces stats vivent seulement dans ce navigateur. Connecte-toi avec MAL pour les garder.",
+    "streak": "Streak"
+  },
+  "leaderboard": {
+    "title": "Classement",
+    "heading": "Classement du Daily",
+    "today": "Daily du jour",
+    "average": "Score moyen",
+    "averageNote": "À partir de {count} Daily joués",
+    "streak": "Streak en cours",
+    "empty": "Aucun Player classé pour l'instant.",
+    "note": "Seuls les Daily joués connecté comptent.",
+    "error": "Le classement n'a pas pu être chargé."
   }
 }

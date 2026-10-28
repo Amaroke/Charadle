@@ -5,6 +5,7 @@ import { GuestStatsDetails } from "@/components/GuestStats";
 import { Stats } from "@/components/Stats";
 import { database } from "@/db/client";
 import { playerDailyStore } from "@/db/player-dailies";
+import { currentStreak } from "@/game/leaderboard";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -22,7 +23,9 @@ async function PlayerStats({ labels }: { labels: Dictionary["stats"] }) {
       </>
     );
   }
-  return <Stats labels={labels} scores={await playerDailyStore(await database()).scores(player.malId)} />;
+  const store = playerDailyStore(await database());
+  const [scores, signedInScores] = await Promise.all([store.scores(player.malId), store.leaderboardScores(player.malId)]);
+  return <Stats labels={labels} scores={scores} streak={currentStreak(signedInScores, new Date())} />;
 }
 
 export default async function StatsPage() {
