@@ -77,5 +77,5 @@ The anime list of a MyAnimeList user, the signed-in Player's own or any username
 _Avoid_: User list, anime list
 
 **Leaderboard**:
-The ranking of Players by Daily results only, built from Dailies played while signed in: today's Daily score, average Daily score over at least seven Dailies, and current Streak.
+The ranking of Players by Daily results only, built from Dailies played while signed in, including the current Daily finished as a Guest just before signing in: today's Daily score, average Daily score over at least seven Dailies, and current Streak.
 _Avoid_: Ranking, scoreboard

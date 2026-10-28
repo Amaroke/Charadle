@@ -1,0 +1,49 @@
+import { boolean, date, integer, jsonb, pgTable, primaryKey, smallint, text, timestamp } from "drizzle-orm/pg-core";
+import type { DrawnCharacter } from "@/game/draw";
+
+export const dailies = pgTable("dailies", {
+  date: date("date", { mode: "string" }).primaryKey(),
+  tiers: jsonb("tiers").$type<DrawnCharacter[]>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const dailyDraws = pgTable("daily_draws", {
+  date: date("date", { mode: "string" }).primaryKey(),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
+  failed: boolean("failed").notNull().default(false),
+});
+
+export const guestProgress = pgTable(
+  "guest_progress",
+  {
+    date: date("date", { mode: "string" }).notNull(),
+    guest: text("guest").notNull(),
+    tier: smallint("tier").notNull(),
+    misses: smallint("misses").notNull(),
+    found: boolean("found").notNull(),
+    hintsUsed: smallint("hints_used").notNull().default(0),
+    animeHint: boolean("anime_hint").notNull().default(false),
+    initialsHint: boolean("initials_hint").notNull().default(false),
+  },
+  (table) => [primaryKey({ columns: [table.date, table.guest] })],
+);
+
+export const players = pgTable("players", {
+  malId: integer("mal_id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  signedInAt: timestamp("signed_in_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const playerDailies = pgTable(
+  "player_dailies",
+  {
+    malId: integer("mal_id")
+      .notNull()
+      .references(() => players.malId),
+    date: date("date", { mode: "string" }).notNull(),
+    score: smallint("score").notNull(),
+    merged: boolean("merged").notNull().default(false),
+  },
+  (table) => [primaryKey({ columns: [table.malId, table.date] })],
+);

@@ -1,0 +1,297 @@
+import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+
+const settingsCookie = {
+  name: "FREE_PLAY_SETTINGS",
+  value: "pool=mal&user=luffyfan&status=completed&score=0&difficulty=normal",
+  url: "http://localhost:3100",
+};
+
+async function rememberSettings(context: BrowserContext) {
+  await context.addCookies([settingsCookie]);
+}
+
+async function startFreePlay(page: Page) {
+  await rememberSettings(page.context());
+  const responses: string[] = [];
+  page.on("response", async (response) => {
+    if (response.request().method() === "POST") responses.push(await response.text().catch(() => ""));
+  });
+  await page.goto("/en");
+  await page.getByRole("link", { name: "Free play" }).click();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeVisible();
+  return responses;
+}
+
+test("a won game reveals the character and the next one comes without reloading", async ({ page }) => {
+  const responses = await startFreePlay(page);
+  await page.evaluate(() => Object.assign(window, { sameDocument: true }));
+
+  const guess = page.getByRole("textbox", { name: "Character name" });
+  await guess.fill("Nami");
+  await page.getByRole("button", { name: "Guess" }).click();
+  await expect(page.getByText("Not quite! Try again.")).toBeVisible();
+  expect(responses.join("\n")).not.toMatch(/luffy|monkey/i);
+
+  await guess.fill("lufy");
+  await page.getByRole("button", { name: "Guess" }).click();
+  await expect(page.getByText("Well done!")).toBeVisible();
+  await expect(page.getByText("Luffy Monkey D.")).toBeVisible();
+  await expect(page.getByText("One Piece")).toBeVisible();
+
+  await page.getByRole("button", { name: "Next character" }).click();
+  await expect(page.getByRole("textbox", { name: "Character name" })).toBeEmpty();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeVisible();
+  expect(await page.evaluate(() => "sameDocument" in window)).toBe(true);
+});
+
+test("giving up reveals the character and the anime", async ({ page }) => {
+  await startFreePlay(page);
+  await page.getByRole("button", { name: "Give up" }).click();
+  await expect(page.getByText("Too bad!")).toBeVisible();
+  await expect(page.getByText("Luffy Monkey D.")).toBeVisible();
+  await expect(page.getByText("One Piece")).toBeVisible();
+});
+
+test("each hint is used once and the hints are disabled once the game is over", async ({ page }) => {
+  const responses = await startFreePlay(page);
+  await expect(page.getByText("One Piece")).toBeHidden();
+  const animeHint = page.getByRole("button", { name: "Reveal the anime" });
+  const initialsHint = page.getByRole("button", { name: "Reveal the initials" });
+
+  await initialsHint.click();
+  await expect(page.getByText("L. M. D.")).toBeVisible();
+  await expect(initialsHint).toBeHidden();
+  expect(responses.join("\n")).not.toMatch(/luffy|monkey/i);
+
+  await animeHint.click();
+  await expect(page.getByText("One Piece")).toBeVisible();
+  await expect(animeHint).toBeHidden();
+
+  await page.getByRole("button", { name: "Give up" }).click();
+  await expect(page.getByText("Too bad!")).toBeVisible();
+  await page.getByRole("button", { name: "Next character" }).click();
+  await expect(page.getByRole("button", { name: "Reveal the anime" })).toBeEnabled();
+  await page.getByRole("button", { name: "Give up" }).click();
+  await expect(page.getByRole("button", { name: "Reveal the anime" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Reveal the initials" })).toBeDisabled();
+});
+
+test("free play speaks French on the French route", async ({ page }) => {
+  await rememberSettings(page.context());
+  await page.goto("/fr/play");
+  await expect(page.getByRole("img", { name: "Personnage à deviner" })).toBeVisible();
+  await page.getByRole("button", { name: "Abandonner" }).click();
+  await expect(page.getByText("Dommage !")).toBeVisible();
+});
+
+test("the anime title is shown in French on the French route", async ({ page }) => {
+  await rememberSettings(page.context());
+  await page.goto("/fr/play");
+  await page.getByRole("button", { name: "Abandonner" }).click();
+  await expect(page.getByText("One Piece (VF)")).toBeVisible();
+  await page.getByRole("button", { name: "Personnage suivant" }).click();
+  await page.getByRole("button", { name: "Révéler l’anime" }).click();
+  await expect(page.getByText("One Piece (VF)")).toBeVisible();
+});
+
+test("the first character is drawn by the server", async ({ request }) => {
+  const cookie = `${settingsCookie.name}=${settingsCookie.value}`;
+  const html = await (await request.get("/en/play", { headers: { cookie } })).text();
+  expect(html.match(/alt="Character to guess"/g)).toHaveLength(1);
+  expect(html.replaceAll("luffyfan", "")).not.toMatch(/luffy|monkey/i);
+});
+
+test("the next character is drawn before it is asked for", async ({ page }) => {
+  await startFreePlay(page);
+  await page.getByRole("button", { name: "Give up" }).click();
+  await expect(page.getByText("Too bad!")).toBeVisible();
+  await page.waitForLoadState("networkidle");
+
+  await page.route("**/*", (route) => (route.request().method() === "POST" ? route.abort() : route.continue()));
+  await page.getByRole("button", { name: "Next character" }).click();
+  await expect(page.getByRole("textbox", { name: "Character name" })).toBeVisible();
+});
+
+test("hints are revealed without asking the server", async ({ page }) => {
+  await startFreePlay(page);
+  await page.route("**/*", (route) => route.abort());
+  await page.getByRole("button", { name: "Reveal the initials" }).click();
+  await expect(page.getByText("L. M. D.")).toBeVisible({ timeout: 2000 });
+  await page.getByRole("button", { name: "Reveal the anime" }).click();
+  await expect(page.getByText("One Piece")).toBeVisible({ timeout: 2000 });
+});
+
+test("hints are stacked one above the other", async ({ page }) => {
+  await startFreePlay(page);
+  const anime = await page.getByRole("button", { name: "Reveal the anime" }).boundingBox();
+  const initials = await page.getByRole("button", { name: "Reveal the initials" }).boundingBox();
+  expect(initials!.y).toBeGreaterThanOrEqual(anime!.y + anime!.height);
+});
+
+test("a first visitor chooses the settings before playing", async ({ page }) => {
+  const draws: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().includes("/api/puzzle")) draws.push(request.url());
+  });
+  await page.goto("/en");
+  await page.getByRole("link", { name: "Free play" }).click();
+  await expect(page.getByRole("form", { name: "Settings" })).toBeVisible();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeHidden();
+  for (const tier of [5, 10, 20, 50, 100, 200, 500]) {
+    await expect(page.getByRole("radio", { name: `Top ${tier}`, exact: true })).toBeVisible();
+  }
+
+  await page.getByText("Top 500", { exact: true }).click();
+  await page.getByText("Expert", { exact: true }).click();
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeVisible();
+  expect(draws[0]).toContain("pool=500&difficulty=expert");
+});
+
+test("the settings are remembered after a reload", async ({ page }) => {
+  await page.goto("/en/play");
+  await page.getByText("Top 20", { exact: true }).click();
+  await page.getByText("Expert", { exact: true }).click();
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeVisible();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByRole("radio", { name: "Top 20", exact: true })).toBeChecked();
+  await expect(page.getByRole("radio", { name: /^Expert/ })).toBeChecked();
+});
+
+test("the settings can be opened during a game and left without losing it", async ({ page }) => {
+  await startFreePlay(page);
+  await page.getByRole("button", { name: "Reveal the initials" }).click();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByRole("radio", { name: "MAL list" })).toBeChecked();
+  await expect(page.getByRole("radio", { name: /^Normal/ })).toBeChecked();
+  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByText("L. M. D.")).toBeVisible();
+});
+
+async function chooseMalList(page: Page, username: string, minScore?: string) {
+  await page.goto("/en/play");
+  await page.getByText("MAL list", { exact: true }).click();
+  await page.getByRole("textbox", { name: "MyAnimeList username" }).fill(username);
+  if (minScore) await page.getByRole("combobox", { name: "Minimum rating" }).selectOption(minScore);
+  await page.getByRole("button", { name: "Play" }).click();
+}
+
+test("a Guest plays on the MAL list of a username", async ({ page }) => {
+  const draws: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().includes("/api/puzzle")) draws.push(request.url());
+  });
+  await page.goto("/en/play");
+  await page.getByText("MAL list", { exact: true }).click();
+  await expect(page.getByRole("checkbox", { name: "Completed" })).toBeChecked();
+  await expect(page.getByRole("checkbox", { name: "Plan to Watch" })).not.toBeChecked();
+  await page.getByRole("textbox", { name: "MyAnimeList username" }).fill("LuffyFan");
+  await page.getByRole("button", { name: "Play" }).click();
+  await expect(page.getByRole("img", { name: "Character to guess" })).toBeVisible();
+  expect(draws[0]).toContain("pool=mal&user=LuffyFan&status=completed&score=0");
+
+  await page.getByRole("button", { name: "Give up" }).click();
+  await expect(page.getByText("One Piece")).toBeVisible();
+
+  await page.reload();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByRole("radio", { name: "MAL list" })).toBeChecked();
+  await expect(page.getByRole("textbox", { name: "MyAnimeList username" })).toHaveValue("LuffyFan");
+});
+
+test("a username that does not exist is told clearly", async ({ page }) => {
+  await chooseMalList(page, "nobody");
+  await expect(page.getByText("No MyAnimeList user has this username.")).toBeVisible();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(page.getByRole("textbox", { name: "MyAnimeList username" })).toHaveValue("nobody");
+});
+
+test("a private MAL list is told clearly", async ({ page }) => {
+  await chooseMalList(page, "secretive");
+  await expect(page.getByText("This MAL list is private.")).toBeVisible();
+});
+
+test("filters that leave no anime are told clearly", async ({ page }) => {
+  await chooseMalList(page, "luffyfan", "10");
+  await expect(page.getByText("No anime of this MAL list matches the filters.")).toBeVisible();
+});
+
+async function missThreeTimes(page: Page) {
+  const guess = page.getByRole("textbox", { name: "Character name" });
+  for (const name of ["Nami", "Zoro", "Sanji"]) {
+    await expect(page.getByRole("button", { name: "Multiple choice" })).toBeHidden();
+    await guess.fill(name);
+    await page.getByRole("button", { name: "Guess" }).click();
+    await expect(page.getByText("Not quite! Try again.")).toBeVisible();
+  }
+}
+
+test("the multiple choice appears after three failed guesses and a right pick wins", async ({ page }) => {
+  const responses = await startFreePlay(page);
+  await missThreeTimes(page);
+  expect(responses.join("\n")).not.toMatch(/luffy|monkey/i);
+
+  await page.getByRole("button", { name: "Multiple choice" }).click();
+  const choices = page.getByRole("region", { name: "Pick the character" }).getByRole("button");
+  await expect(choices).toHaveCount(4);
+  await expect(choices).toContainText(["Luffy Monkey D."]);
+  await choices.filter({ hasText: "Luffy Monkey D." }).click();
+  await expect(page.getByText("Well done!")).toBeVisible();
+  await expect(choices.first()).toBeDisabled();
+});
+
+test("a wrong pick in the multiple choice loses the game", async ({ page }) => {
+  await startFreePlay(page);
+  await missThreeTimes(page);
+  await page.getByRole("button", { name: "Multiple choice" }).click();
+  await page.getByRole("region", { name: "Pick the character" }).getByRole("button", { name: "Nami" }).click();
+  await expect(page.getByText("Too bad!")).toBeVisible();
+  await expect(page.locator("[aria-live]").getByText("Luffy Monkey D.")).toBeVisible();
+
+  await page.getByRole("button", { name: "Next character" }).click();
+  await expect(page.getByRole("textbox", { name: "Character name" })).toBeEmpty();
+  await expect(page.getByRole("button", { name: "Multiple choice" })).toBeHidden();
+});
+
+test("Enter starts the next character once the game is over", async ({ page }) => {
+  await startFreePlay(page);
+  const guess = page.getByRole("textbox", { name: "Character name" });
+  await guess.fill("Nami");
+  await guess.press("Enter");
+  await expect(page.getByText("Not quite! Try again.")).toBeVisible();
+  await expect(guess).toBeVisible();
+
+  await guess.fill("Luffy");
+  await guess.press("Enter");
+  await expect(page.getByText("Well done!")).toBeVisible();
+
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("textbox", { name: "Character name" })).toBeEmpty();
+  await expect(page.getByText("Well done!")).toBeHidden();
+});
+
+test("Enter starts the next character after giving up with the mouse", async ({ page }) => {
+  await startFreePlay(page);
+  await page.getByRole("button", { name: "Give up" }).click();
+  await expect(page.getByText("Too bad!")).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("textbox", { name: "Character name" })).toBeEmpty();
+});
+
+test("a chain of puzzles never draws the same character twice", async ({ page }) => {
+  await page.context().addCookies([{ ...settingsCookie, value: "pool=500&difficulty=normal" }]);
+  await page.goto("/en/play");
+  const revealed: string[] = [];
+  for (let puzzle = 0; puzzle < 7; puzzle++) {
+    await page.getByRole("button", { name: "Give up" }).click();
+    const character = page.locator("[aria-live]").locator("p").nth(1).locator("span.font-bold");
+    revealed.push((await character.textContent()) ?? "");
+    await page.getByRole("button", { name: "Next character" }).click();
+    await expect(page.getByRole("button", { name: "Give up" })).toBeVisible();
+  }
+  expect(new Set(revealed).size).toBe(7);
+});
