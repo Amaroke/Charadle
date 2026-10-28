@@ -7,6 +7,12 @@ export const dailies = pgTable("dailies", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const dailyDraws = pgTable("daily_draws", {
+  date: date("date", { mode: "string" }).primaryKey(),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull(),
+  failed: boolean("failed").notNull().default(false),
+});
+
 export const guestProgress = pgTable(
   "guest_progress",
   {

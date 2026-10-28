@@ -87,6 +87,7 @@
     "comeBack": "A new Daily starts every day at 12:00 UTC.",
     "home": "Back to home",
     "error": "Could not load the Daily.",
+    "pending": "Today's Daily is on its way. Come back in a little while.",
     "loading": "Loading the Daily…",
     "hints": "Hints",
     "hintAnime": "Reveal the anime (−1)",
